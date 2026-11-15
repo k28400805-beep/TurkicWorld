@@ -2,358 +2,901 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101820">
-  <meta name="description" content="Türk tarihini keşfet. Türk devletlerini, hükümdarları, tarihî dönemleri ve kültürel mirası interaktif bir atlas üzerinden incele.">
-  <title>Türk Tarihi Atlası | TurkicWorld</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101820">
+    <meta name="description" content="Türk tarihini keşfet, Türk devletlerini tanı ve kendi devletini yönet. Türk Tarihi Atlası.">
+    <title>Türk Tarihi Atlası | Tarihe Yön Ver</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div class="page-loader" id="pageLoader">
-    <div class="loader-mark">✥</div>
-    <div class="loader-title">TÜRK TARİHİ ATLASI</div>
-    <div class="loader-line"><span></span></div>
-    <p>Geçmişin izleri yükleniyor...</p>
-  </div>
 
-  <header class="site-header" id="top">
-    <a class="brand" href="#home" aria-label="Türk Tarihi Atlası ana sayfa">
-      <span class="brand-symbol">✥</span>
-      <span class="brand-copy">
-        <strong>TÜRK TARİHİ ATLASI</strong>
-        <small>TURKIC WORLD · INTERACTIVE ATLAS</small>
-      </span>
-    </a>
-
-    <button class="mobile-menu-button" id="mobileMenuButton" aria-label="Menüyü aç" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-
-    <nav class="main-nav" id="mainNav">
-      <a class="nav-link active" href="#home">Ana Sayfa</a>
-      <a class="nav-link" href="#atlas">Tarih Atlası</a>
-      <a class="nav-link" href="#states">Türk Devletleri</a>
-      <a class="nav-link" href="#timeline">Zaman Çizelgesi</a>
-      <a class="nav-link" href="#game">Strateji Dünyası</a>
-    </nav>
-
-    <div class="header-actions">
-      <button class="icon-button" id="themeButton" title="Görünümü değiştir" aria-label="Görünümü değiştir">◐</button>
-      <a class="header-cta" href="#atlas">Atlası keşfet <span>↗</span></a>
+    <!-- AÇILIŞ EKRANI -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-emblem">✦</div>
+            <div class="loading-title">TÜRK TARİHİ ATLASI</div>
+            <div class="loading-subtitle">Geçmişten geleceğe...</div>
+            <div class="loading-progress">
+                <div id="loading-progress-bar"></div>
+            </div>
+            <div id="loading-status">Atlas hazırlanıyor...</div>
+        </div>
     </div>
-  </header>
 
-  <main>
-    <section class="hero" id="home">
-      <div class="hero-background"></div>
-      <div class="hero-pattern"></div>
-      <div class="hero-content">
-        <div class="eyebrow"><span></span> ORTA ASYA'DAN ANADOLU'YA · BİNLERCE YILLIK MİRAS</div>
-        <h1>Bir milletin<br><em>binlerce yıllık</em><br>yolculuğu.</h1>
-        <p class="hero-description">
-          Türk tarihinin devletlerini, hükümdarlarını, kültürünü ve dönüm noktalarını
-          tek bir dijital atlas üzerinde keşfet.
-        </p>
-        <div class="hero-buttons">
-          <a class="button button-primary" href="#atlas">Tarih atlasını keşfet <span>↗</span></a>
-          <a class="button button-outline" href="#game">Strateji dünyasına gir <span>→</span></a>
-        </div>
-        <div class="hero-footnote">
-          <span class="hero-footnote-line"></span>
-          <span>GEÇMİŞTEN GELECEĞE</span>
-          <span class="hero-footnote-year">MÖ 220 — 2026</span>
-        </div>
-      </div>
-      <div class="hero-side-note">TARİH · KÜLTÜR · COĞRAFYA · MEDENİYET</div>
-      <div class="hero-emblem" aria-hidden="true">
-        <div class="emblem-ring"></div>
-        <div class="emblem-inner">𐱅𐰇𐰼𐰜</div>
-        <span>✥</span>
-      </div>
-    </section>
+    <!-- ANA UYGULAMA -->
+    <div id="app" class="app hidden">
 
-    <section class="intro-strip">
-      <div class="intro-item"><strong id="stateCount">0</strong><span>DEVLET KAYDI</span></div>
-      <div class="intro-item"><strong>2.200+</strong><span>YILLIK TARİHSEL KAPSAM</span></div>
-      <div class="intro-item"><strong>3</strong><span>KITAYA YAYILAN TARİH</span></div>
-      <div class="intro-item"><strong>∞</strong><span>KEŞFEDİLECEK HİKÂYE</span></div>
-    </section>
+        <!-- ÜST MENÜ -->
+        <header class="topbar">
 
-    <section class="section featured-section" id="featured">
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow"><span></span> TARİH SAHNESİNDE</div>
-          <h2>Öne çıkan <em>devletler.</em></h2>
-          <p>Türk tarihinin farklı dönemlerinden önemli siyasi oluşumlar.</p>
-        </div>
-        <a class="text-link" href="#states">Tüm devletleri gör <span>↗</span></a>
-      </div>
-      <div class="featured-grid" id="featuredGrid"></div>
-    </section>
-
-    <section class="atlas-section section" id="atlas">
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow"><span></span> TARİHİN COĞRAFYASI</div>
-          <h2>Türk dünyasının <em>izinde.</em></h2>
-          <p>Dönem seçerek devletlerin tarihî coğrafyalarını ve temel bilgilerini incele.</p>
-        </div>
-        <div class="map-disclaimer">Şematik gösterim · Kesin tarihî sınır haritası değildir</div>
-      </div>
-
-      <div class="atlas-toolbar">
-        <label class="select-wrap">
-          <span>DÖNEM</span>
-          <select id="mapPeriod">
-            <option value="all">Bütün dönemler</option>
-            <option value="ancient">İlk Türk devletleri</option>
-            <option value="islamic">Türk-İslam devletleri</option>
-            <option value="empire">İmparatorluklar</option>
-            <option value="modern">Modern Türk devletleri</option>
-          </select>
-        </label>
-        <div class="map-legend">
-          <span><i class="legend-dot ancient"></i> İlk dönem</span>
-          <span><i class="legend-dot islamic"></i> Türk-İslam</span>
-          <span><i class="legend-dot empire"></i> İmparatorluk</span>
-          <span><i class="legend-dot modern"></i> Modern</span>
-        </div>
-      </div>
-
-      <div class="atlas-layout">
-        <div class="map-panel">
-          <div class="map-panel-top">
-            <span>✥ TARİHÎ COĞRAFYA</span>
-            <span id="mapPeriodLabel">BÜTÜN DÖNEMLER</span>
-          </div>
-          <div class="map-canvas" id="mapCanvas">
-            <svg class="atlas-map" viewBox="0 0 900 520" role="img" aria-label="Türk tarihinin önemli coğrafi merkezlerini gösteren şematik harita">
-              <defs>
-                <pattern id="mapGrid" width="36" height="36" patternUnits="userSpaceOnUse">
-                  <path d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" stroke-opacity=".08" stroke-width="1"/>
-                </pattern>
-                <radialGradient id="mapGlow">
-                  <stop offset="0%" stop-color="#c6a66b" stop-opacity=".2"/>
-                  <stop offset="100%" stop-color="#c6a66b" stop-opacity="0"/>
-                </radialGradient>
-              </defs>
-              <rect width="900" height="520" fill="url(#mapGrid)"/>
-              <ellipse cx="440" cy="250" rx="330" ry="220" fill="url(#mapGlow)"/>
-              <g class="map-land" fill="#b99b68" fill-opacity=".08" stroke="#c4a875" stroke-opacity=".35" stroke-width="1.5">
-                <path d="M55 170 L105 120 180 105 225 130 275 110 330 125 365 95 420 110 470 95 520 115 565 95 625 120 680 115 735 145 800 170 840 210 805 250 765 265 740 310 690 325 650 355 600 350 555 385 510 370 465 400 410 380 365 395 320 365 270 380 220 345 170 340 125 300 85 280 60 235 Z"/>
-                <path d="M160 350 L210 340 250 365 260 410 230 450 185 440 150 400 Z"/>
-                <path d="M505 385 L555 380 590 410 575 450 535 465 500 435 Z"/>
-                <path d="M680 355 L735 350 775 380 760 415 715 425 680 395 Z"/>
-              </g>
-              <g class="map-routes" fill="none" stroke="#c6a66b" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="5 7">
-                <path d="M180 235 Q350 130 510 220 T770 240"/>
-                <path d="M250 350 Q390 270 520 310 T720 390"/>
-              </g>
-              <g id="mapMarkers"></g>
-              <g class="map-labels" fill="currentColor" font-size="11" opacity=".55">
-                <text x="350" y="65">ORTA ASYA</text>
-                <text x="85" y="190">AVRUPA</text>
-                <text x="365" y="465">ANADOLU</text>
-                <text x="700" y="470">DOĞU ASYA</text>
-              </g>
-            </svg>
-            <div class="map-compass"><span>N</span><b>✥</b><small>S</small></div>
-            <div class="map-scale">ŞEMATİK GÖSTERİM</div>
-          </div>
-          <div class="map-panel-bottom">
-            <span id="mapResultCount">Devlet seçilmedi</span>
-            <button class="small-button" id="resetMapButton">Haritayı sıfırla ↺</button>
-          </div>
-        </div>
-
-        <aside class="map-info-panel" id="mapInfoPanel">
-          <div class="info-panel-kicker">ATLAS BİLGİSİ</div>
-          <div class="info-placeholder">
-            <div class="placeholder-symbol">✥</div>
-            <h3>Bir devlet seç.</h3>
-            <p>Haritadaki işaretlerden birine tıklayarak ilgili devletin bilgilerini görüntüle.</p>
-          </div>
-          <div class="map-selected-info" id="mapSelectedInfo" hidden></div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="section states-section" id="states">
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow"><span></span> TARİHÎ DEVLET ARŞİVİ</div>
-          <h2>Devletler ve <em>medeniyetler.</em></h2>
-          <p>Devletleri dönemlerine göre filtrele, hükümdarlarını ve tarihlerini keşfet.</p>
-        </div>
-        <div class="archive-count"><strong id="archiveCount">0</strong><span>KAYIT</span></div>
-      </div>
-
-      <div class="archive-controls">
-        <div class="search-box">
-          <span>⌕</span>
-          <input id="stateSearch" type="search" placeholder="Devlet, hükümdar veya başkent ara..." autocomplete="off">
-          <kbd>/</kbd>
-        </div>
-        <select id="stateSort" aria-label="Sıralama">
-          <option value="chronological">Tarihe göre</option>
-          <option value="name">İsme göre</option>
-        </select>
-      </div>
-
-      <div class="filter-tabs" id="stateFilters">
-        <button class="filter-tab active" data-filter="all">Tümü</button>
-        <button class="filter-tab" data-filter="ancient">İlk Türk devletleri</button>
-        <button class="filter-tab" data-filter="islamic">Türk-İslam</button>
-        <button class="filter-tab" data-filter="empire">İmparatorluklar</button>
-        <button class="filter-tab" data-filter="modern">Modern dönem</button>
-      </div>
-
-      <div class="states-grid" id="statesGrid"></div>
-      <div class="empty-state" id="emptyState" hidden>
-        <span>⌕</span>
-        <h3>Sonuç bulunamadı.</h3>
-        <p>Farklı bir arama kelimesi veya dönem seçmeyi dene.</p>
-      </div>
-    </section>
-
-    <section class="timeline-section section" id="timeline">
-      <div class="section-heading">
-        <div>
-          <div class="eyebrow"><span></span> ZAMANIN İZİNDE</div>
-          <h2>Tarihin büyük <em>dönüm noktaları.</em></h2>
-          <p>Türk tarihindeki önemli olayları kronolojik sırayla incele.</p>
-        </div>
-      </div>
-      <div class="timeline-filter">
-        <button class="timeline-filter-button active" data-era="all">Tüm olaylar</button>
-        <button class="timeline-filter-button" data-era="ancient">İlk dönem</button>
-        <button class="timeline-filter-button" data-era="islamic">Türk-İslam</button>
-        <button class="timeline-filter-button" data-era="empire">İmparatorluklar</button>
-        <button class="timeline-filter-button" data-era="modern">Modern dönem</button>
-      </div>
-      <div class="timeline-list" id="timelineList"></div>
-    </section>
-
-    <section class="game-section section" id="game">
-      <div class="game-heading">
-        <div>
-          <div class="eyebrow"><span></span> TARİHSEL YÖNETİM SİMÜLASYONU</div>
-          <h2>Bir devlet yönet.<br><em>Bir tarih yaz.</em></h2>
-          <p>Bir devlet seç, kaynaklarını yönet, ekonomini geliştir ve diplomatik ilişkiler kur. Oyun, tarihî dönemlerden esinlenen kurgusal bir yönetim simülasyonudur.</p>
-        </div>
-        <div class="game-emblem">𐱅𐰇𐰼𐰜</div>
-      </div>
-
-      <div class="game-shell">
-        <div class="game-topbar">
-          <div class="game-topbar-brand"><span>✥</span> YÖNETİM MERKEZİ</div>
-          <div class="game-status"><span class="status-dot"></span><span id="gameStatus">HAZIR</span></div>
-          <div class="game-save-status" id="saveStatus">Oyun kaydı hazır</div>
-        </div>
-
-        <div class="game-start" id="gameStart">
-          <div class="game-start-copy">
-            <span class="mini-label">YENİ BİR TARİHSEL YOLCULUK</span>
-            <h3>Hangi devleti<br>yöneteceksin?</h3>
-            <p>Oynamak istediğin devleti seç. Her devletin başlangıç kaynakları ve tarihî dönemi farklıdır.</p>
-          </div>
-          <div class="game-start-controls">
-            <label for="gameStateSelect">DEVLET SEÇ</label>
-            <select id="gameStateSelect">
-              <option value="">Bir devlet seç...</option>
-            </select>
-            <button class="button button-primary" id="startGameButton">Yönetimi devral <span>→</span></button>
-          </div>
-        </div>
-
-        <div class="game-dashboard" id="gameDashboard" hidden>
-          <div class="game-overview">
-            <div>
-              <span class="mini-label">YÖNETİLEN DEVLET</span>
-              <h3 id="gameStateName">Devlet</h3>
-              <p id="gameStatePeriod">Dönem bilgisi</p>
-            </div>
-            <div class="game-clock">
-              <span>OYUN TAKVİMİ</span>
-              <strong id="gameDate">1. Yıl</strong>
-              <small id="gameTurn">1. dönem</small>
-            </div>
-          </div>
-
-          <div class="resource-grid">
-            <div class="resource-card"><span class="resource-icon">◈</span><div><small>HAZİNE</small><strong id="treasuryValue">0</strong><em id="treasuryChange">+0 / dönem</em></div></div>
-            <div class="resource-card"><span class="resource-icon">⌂</span><div><small>EKONOMİ</small><strong id="economyValue">0</strong><em>Üretim kapasitesi</em></div></div>
-            <div class="resource-card"><span class="resource-icon">♜</span><div><small>YÖNETİM GÜCÜ</small><strong id="powerValue">0</strong><em>Kurumsal kapasite</em></div></div>
-            <div class="resource-card"><span class="resource-icon">✥</span><div><small>İSTİKRAR</small><strong id="stabilityValue">0</strong><em>Toplumsal denge</em></div></div>
-          </div>
-
-          <div class="game-content-grid">
-            <div class="game-main-panel">
-              <div class="panel-heading"><div><span class="mini-label">DEVLETİN DURUMU</span><h4>Yönetim ve gelişim</h4></div><span class="panel-icon">⌂</span></div>
-              <div class="progress-row"><div><span>Ekonomik gelişim</span><strong id="economyPercent">0%</strong></div><div class="progress-track"><span id="economyBar"></span></div></div>
-              <div class="progress-row"><div><span>Yönetim kapasitesi</span><strong id="powerPercent">0%</strong></div><div class="progress-track"><span id="powerBar"></span></div></div>
-              <div class="progress-row"><div><span>Toplumsal istikrar</span><strong id="stabilityPercent">0%</strong></div><div class="progress-track"><span id="stabilityBar"></span></div></div>
-
-              <div class="panel-divider"></div>
-              <div class="panel-heading"><div><span class="mini-label">DEVLET KARARLARI</span><h4>Yönetim politikaları</h4></div></div>
-              <div class="decision-grid">
-                <button class="decision-button" data-action="economy"><span>◈</span><strong>Ekonomiyi geliştir</strong><small>Üretim ve hazineyi destekle</small><em>− 20 hazine</em></button>
-                <button class="decision-button" data-action="stability"><span>✥</span><strong>İstikrarı güçlendir</strong><small>Yönetim ve toplumsal denge</small><em>− 15 hazine</em></button>
-                <button class="decision-button" data-action="administration"><span>⌂</span><strong>Kurumları geliştir</strong><small>Yönetim kapasitesini artır</small><em>− 25 hazine</em></button>
-                <button class="decision-button" data-action="research"><span>⌘</span><strong>Bilgi ve kültüre yatırım</strong><small>Eğitim ve kültürel gelişim</small><em>− 20 hazine</em></button>
-              </div>
+            <div class="brand">
+                <div class="brand-symbol">✦</div>
+                <div class="brand-text">
+                    <strong>TÜRK TARİHİ ATLASI</strong>
+                    <span>GEÇMİŞTEN GELECEĞE</span>
+                </div>
             </div>
 
-            <aside class="game-side-panel">
-              <div class="panel-heading"><div><span class="mini-label">DİPLOMASİ</span><h4>Devletler arası ilişkiler</h4></div></div>
-              <div class="diplomacy-list" id="diplomacyList"></div>
-              <div class="panel-divider"></div>
-              <div class="panel-heading"><div><span class="mini-label">ZAMAN YÖNETİMİ</span><h4>Simülasyon kontrolü</h4></div></div>
-              <div class="time-controls">
-                <button class="button button-primary" id="nextTurnButton">Sonraki dönem →</button>
-                <button class="button button-muted" id="pauseGameButton">Oyunu duraklat</button>
-                <button class="button button-muted" id="saveGameButton">Kaydet</button>
-                <button class="button button-muted" id="leaveGameButton">Devletten ayrıl</button>
-              </div>
-            </aside>
-          </div>
+            <nav class="main-navigation">
+                <button class="nav-item active" data-page="home">Ana Sayfa</button>
+                <button class="nav-item" data-page="atlas">Tarih Atlası</button>
+                <button class="nav-item" data-page="states">Türk Devletleri</button>
+                <button class="nav-item" data-page="game">Strateji Oyunu</button>
+            </nav>
 
-          <div class="game-log-panel">
-            <div class="panel-heading"><div><span class="mini-label">DEVLET ARŞİVİ</span><h4>Gelişmeler ve kayıtlar</h4></div><button class="text-button" id="clearLogButton">Temizle</button></div>
-            <div class="game-log" id="gameLog" aria-live="polite"></div>
-          </div>
+            <div class="topbar-right">
+                <div class="online-indicator">
+                    <span class="status-dot"></span>
+                    <span>ÇEVRİMDIŞI MOD</span>
+                </div>
+                <button id="settings-button" class="icon-button" title="Ayarlar">⚙</button>
+            </div>
+
+        </header>
+
+        <!-- ANA İÇERİK -->
+        <main class="main-content">
+
+            <!-- ANA SAYFA -->
+            <section id="page-home" class="page active">
+
+                <div class="hero-section">
+                    <div class="hero-overlay"></div>
+
+                    <div class="hero-content">
+                        <div class="hero-label">
+                            <span></span>
+                            BİR MİLLETİN BİNLERCE YILLIK YOLCULUĞU
+                            <span></span>
+                        </div>
+
+                        <h1>
+                            TARİHE YÖN VEREN<br>
+                            <span>TÜRK MİLLETİ</span>
+                        </h1>
+
+                        <p>
+                            Orta Asya bozkırlarından Anadolu'ya, tarihin
+                            derinliklerinden günümüze uzanan büyük yolculuğu keşfet.
+                        </p>
+
+                        <div class="hero-actions">
+                            <button class="primary-button" data-goto="atlas">
+                                TARİHİ KEŞFET <span>→</span>
+                            </button>
+
+                            <button class="secondary-button" data-goto="game">
+                                OYUNA BAŞLA <span>▶</span>
+                            </button>
+                        </div>
+
+                        <div class="hero-bottom">
+                            <span>ASIRLARIN MİRASI</span>
+                            <span>•</span>
+                            <span>ORTAK TARİH</span>
+                            <span>•</span>
+                            <span>ORTAK KÜLTÜR</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-side-text">TÜRK TARİHİ</div>
+                </div>
+
+                <!-- İSTATİSTİKLER -->
+                <div class="statistics-grid">
+
+                    <div class="stat-card">
+                        <div class="stat-icon">♜</div>
+                        <div class="stat-number" id="home-state-count">0</div>
+                        <div class="stat-label">TÜRK DEVLETİ VE SİYASİ TEŞEKKÜL</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⌛</div>
+                        <div class="stat-number" id="home-period-count">0</div>
+                        <div class="stat-label">TARİHÎ DÖNEM</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">♛</div>
+                        <div class="stat-number" id="home-ruler-count">0</div>
+                        <div class="stat-label">TARİHÎ ŞAHSİYET</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⚑</div>
+                        <div class="stat-number" id="home-event-count">0</div>
+                        <div class="stat-label">TARİHÎ OLAY</div>
+                    </div>
+
+                </div>
+
+                <!-- ÖNE ÇIKANLAR -->
+                <div class="content-section">
+
+                    <div class="section-heading">
+                        <div>
+                            <span class="eyebrow">TARİHİN İZİNDE</span>
+                            <h2>Keşfetmeye Başla</h2>
+                        </div>
+                        <span class="section-description">
+                            Türk tarihinin farklı yönlerini keşfet.
+                        </span>
+                    </div>
+
+                    <div class="feature-grid">
+
+                        <article class="feature-card feature-atlas" data-goto="atlas">
+                            <div class="feature-card-content">
+                                <span class="feature-number">01</span>
+                                <h3>Tarih Atlası</h3>
+                                <p>Türk tarihinin coğrafyasını ve dönemlerini incele.</p>
+                                <span class="feature-link">ATLASI AÇ →</span>
+                            </div>
+                        </article>
+
+                        <article class="feature-card feature-states" data-goto="states">
+                            <div class="feature-card-content">
+                                <span class="feature-number">02</span>
+                                <h3>Türk Devletleri</h3>
+                                <p>Kurulan devletleri, hükümdarları ve miraslarını tanı.</p>
+                                <span class="feature-link">DEVLETLERİ GÖR →</span>
+                            </div>
+                        </article>
+
+                        <article class="feature-card feature-game" data-goto="game">
+                            <div class="feature-card-content">
+                                <span class="feature-number">03</span>
+                                <h3>Strateji Oyunu</h3>
+                                <p>Kendi devletini yönet, ekonomini geliştir ve tarihe yön ver.</p>
+                                <span class="feature-link">OYUNA GİR →</span>
+                            </div>
+                        </article>
+
+                    </div>
+                </div>
+
+                <!-- TARİHİ ZAMAN ÇİZELGESİ -->
+                <div class="content-section">
+                    <div class="section-heading">
+                        <div>
+                            <span class="eyebrow">ZAMANIN İÇİNDE</span>
+                            <h2>Tarihî Yolculuk</h2>
+                        </div>
+                    </div>
+
+                    <div id="home-timeline" class="timeline-container">
+                        <div class="timeline-line"></div>
+                        <div id="home-timeline-items" class="timeline-items"></div>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- TARİH ATLASI -->
+            <section id="page-atlas" class="page">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">COĞRAFYANIN HAFIZASI</span>
+                        <h1>Tarih Atlası</h1>
+                        <p>Türk tarihinin izlerini coğrafya üzerinde keşfet.</p>
+                    </div>
+
+                    <div class="page-heading-actions">
+                        <button id="atlas-reset-button" class="small-button">Haritayı Sıfırla</button>
+                    </div>
+                </div>
+
+                <div class="atlas-layout">
+
+                    <aside class="atlas-sidebar">
+
+                        <div class="panel-heading">
+                            <h3>Tarihî Dönemler</h3>
+                            <span>01</span>
+                        </div>
+
+                        <div id="period-list" class="period-list"></div>
+
+                        <div class="sidebar-divider"></div>
+
+                        <div class="panel-heading">
+                            <h3>Harita Katmanları</h3>
+                            <span>02</span>
+                        </div>
+
+                        <label class="layer-option">
+                            <input type="checkbox" id="layer-states" checked>
+                            <span class="custom-checkbox"></span>
+                            Türk devletleri
+                        </label>
+
+                        <label class="layer-option">
+                            <input type="checkbox" id="layer-cities" checked>
+                            <span class="custom-checkbox"></span>
+                            Önemli şehirler
+                        </label>
+
+                        <label class="layer-option">
+                            <input type="checkbox" id="layer-routes">
+                            <span class="custom-checkbox"></span>
+                            Tarihî yollar
+                        </label>
+
+                        <label class="layer-option">
+                            <input type="checkbox" id="layer-labels" checked>
+                            <span class="custom-checkbox"></span>
+                            Yer adları
+                        </label>
+
+                    </aside>
+
+                    <div class="atlas-main">
+
+                        <div class="map-toolbar">
+                            <div class="map-toolbar-title">
+                                <span class="map-live-dot"></span>
+                                <span id="map-period-name">TÜRK TARİHİ</span>
+                            </div>
+
+                            <div class="map-toolbar-actions">
+                                <button id="map-zoom-out" class="map-control" title="Uzaklaştır">−</button>
+                                <button id="map-zoom-in" class="map-control" title="Yakınlaştır">+</button>
+                                <button id="map-fullscreen" class="map-control" title="Tam ekran">⛶</button>
+                            </div>
+                        </div>
+
+                        <div id="atlas-map" class="atlas-map">
+                            <div id="map-canvas" class="map-canvas">
+                                <svg id="historical-map" viewBox="0 0 1000 620" role="img" aria-label="Türk tarihî coğrafya haritası">
+                                    <g id="map-background"></g>
+                                    <g id="map-routes"></g>
+                                    <g id="map-regions"></g>
+                                    <g id="map-cities"></g>
+                                    <g id="map-labels"></g>
+                                </svg>
+                            </div>
+
+                            <div class="map-legend">
+                                <span><i class="legend-dot legend-turkic"></i> Türk devletleri</span>
+                                <span><i class="legend-dot legend-city"></i> Önemli şehirler</span>
+                            </div>
+
+                            <div id="map-tooltip" class="map-tooltip hidden"></div>
+                        </div>
+
+                        <div class="map-bottom-bar">
+                            <span id="map-coordinate-info">Tarihî coğrafyayı keşfet</span>
+                            <span>ŞEMATİK TARİHÎ HARİTA</span>
+                        </div>
+
+                    </div>
+
+                    <aside class="atlas-detail-panel">
+
+                        <div class="panel-heading">
+                            <h3>Bilgi Paneli</h3>
+                            <span>03</span>
+                        </div>
+
+                        <div id="atlas-detail-content">
+                            <div class="empty-detail">
+                                <div class="empty-detail-icon">⌖</div>
+                                <h3>Bir bölge seç</h3>
+                                <p>Haritadaki bir devletin veya şehrin üzerine tıklayarak tarihî bilgilerine ulaşabilirsin.</p>
+                            </div>
+                        </div>
+
+                    </aside>
+
+                </div>
+
+                <div class="atlas-footer">
+                    <span>Türk Tarihi Atlası</span>
+                    <span>Harita sınırları tarihî dönemlere göre değişebilir.</span>
+                </div>
+
+            </section>
+
+
+            <!-- TÜRK DEVLETLERİ -->
+            <section id="page-states" class="page">
+
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">ORTAK TARİH VE MİRAS</span>
+                        <h1>Türk Devletleri</h1>
+                        <p>Türk tarihindeki devletleri ve siyasi teşekkülleri keşfet.</p>
+                    </div>
+                </div>
+
+                <div class="states-toolbar">
+
+                    <div class="search-box">
+                        <span>⌕</span>
+                        <input id="state-search" type="search" placeholder="Devlet veya hükümdar ara...">
+                    </div>
+
+                    <select id="state-period-filter">
+                        <option value="all">Bütün dönemler</option>
+                    </select>
+
+                    <select id="state-type-filter">
+                        <option value="all">Bütün türler</option>
+                        <option value="empire">İmparatorluk</option>
+                        <option value="state">Devlet</option>
+                        <option value="khanate">Hanlık</option>
+                        <option value="modern">Modern devlet</option>
+                    </select>
+
+                </div>
+
+                <div class="states-summary">
+                    <div>
+                        <span class="summary-number" id="states-result-count">0</span>
+                        <span class="summary-label">KAYITLI DEVLET</span>
+                    </div>
+
+                    <div class="states-view-switch">
+                        <button id="states-grid-view" class="view-button active">▦ Kartlar</button>
+                        <button id="states-list-view" class="view-button">☷ Liste</button>
+                    </div>
+                </div>
+
+                <div id="states-grid" class="states-grid"></div>
+
+                <div id="states-empty" class="empty-state hidden">
+                    <div>⌕</div>
+                    <h3>Sonuç bulunamadı</h3>
+                    <p>Arama kelimeni veya filtrelerini değiştirebilirsin.</p>
+                </div>
+
+                <!-- DEVLET DETAY MODALI -->
+                <div id="state-modal" class="modal hidden">
+                    <div class="modal-backdrop" data-close-modal="state-modal"></div>
+
+                    <div class="modal-content state-modal-content">
+                        <button class="modal-close" data-close-modal="state-modal">×</button>
+                        <div id="state-modal-body"></div>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- STRATEJİ OYUNU -->
+            <section id="page-game" class="page">
+
+                <!-- OYUN MENÜSÜ -->
+                <div id="game-menu" class="game-menu">
+
+                    <div class="game-menu-hero">
+                        <span class="eyebrow">KENDİ TARİHİNİ YAZ</span>
+                        <h1>DEVLETİNİ KUR.<br><span>GELECEĞİNİ YÖNET.</span></h1>
+                        <p>
+                            Bir devlet seç, ekonomini geliştir, şehirlerini yönet,
+                            diplomatik ilişkiler kur ve kendi tarihini oluştur.
+                        </p>
+                    </div>
+
+                    <div class="game-menu-content">
+
+                        <div class="game-menu-heading">
+                            <div>
+                                <span class="eyebrow">YENİ BİR TARİH</span>
+                                <h2>Yeni Oyun</h2>
+                            </div>
+                            <span class="game-version">STRATEJİ MODU</span>
+                        </div>
+
+                        <div class="scenario-grid">
+
+                            <button class="scenario-card selected" data-scenario="modern">
+                                <span class="scenario-symbol">🇹🇷</span>
+                                <span class="scenario-date">1923 — GÜNÜMÜZ</span>
+                                <strong>Türkiye Cumhuriyeti</strong>
+                                <span>Modern çağda Türkiye'yi yönet.</span>
+                                <i>SEÇİLDİ</i>
+                            </button>
+
+                            <button class="scenario-card" data-scenario="gokturk">
+                                <span class="scenario-symbol">𐱅𐰇𐰼𐰜</span>
+                                <span class="scenario-date">552 — 744</span>
+                                <strong>Göktürk Kağanlığı</strong>
+                                <span>Bozkırda bir kağanlık kur.</span>
+                                <i>SEÇ</i>
+                            </button>
+
+                            <button class="scenario-card" data-scenario="seljuk">
+                                <span class="scenario-symbol">☾</span>
+                                <span class="scenario-date">1037 — 1194</span>
+                                <strong>Büyük Selçuklu</strong>
+                                <span>Selçuklu mirasını yönet.</span>
+                                <i>SEÇ</i>
+                            </button>
+
+                            <button class="scenario-card" data-scenario="ottoman">
+                                <span class="scenario-symbol">☪</span>
+                                <span class="scenario-date">1299 — 1922</span>
+                                <strong>Osmanlı Devleti</strong>
+                                <span>Osmanlı döneminde devletini yönet.</span>
+                                <i>SEÇ</i>
+                            </button>
+
+                        </div>
+
+                        <div class="game-setup-panel">
+
+                            <div class="setup-information">
+                                <span class="eyebrow">SEÇİLİ SENARYO</span>
+                                <h3 id="selected-scenario-name">Türkiye Cumhuriyeti</h3>
+                                <p id="selected-scenario-description">
+                                    1923 yılında kurulan Türkiye Cumhuriyeti ile modern çağda yeni bir döneme başla.
+                                </p>
+                            </div>
+
+                            <div class="setup-options">
+                                <label>
+                                    Zorluk
+                                    <select id="game-difficulty">
+                                        <option value="easy">Kolay</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="hard">Zor</option>
+                                    </select>
+                                </label>
+
+                                <label>
+                                    Oyun hızı
+                                    <select id="game-start-speed">
+                                        <option value="1">Normal</option>
+                                        <option value="2">Hızlı</option>
+                                        <option value="3">Çok hızlı</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <button id="start-game-button" class="primary-button start-game-button">
+                                YENİ OYUNA BAŞLA <span>→</span>
+                            </button>
+
+                        </div>
+
+                        <div class="saved-game-section">
+                            <div>
+                                <span class="eyebrow">KALDIĞIN YERDEN DEVAM ET</span>
+                                <h3>Kayıtlı Oyun</h3>
+                            </div>
+
+                            <div id="saved-game-info" class="saved-game-info">
+                                <span>Henüz kayıtlı oyun bulunmuyor.</span>
+                                <button id="load-game-button" disabled>DEVAM ET →</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- OYUN EKRANI -->
+                <div id="game-interface" class="game-interface hidden">
+
+                    <!-- OYUN ÜST BAR -->
+                    <div class="game-topbar">
+
+                        <div class="game-country">
+                            <div id="game-country-flag" class="game-country-flag">🇹🇷</div>
+                            <div>
+                                <strong id="game-country-name">Türkiye Cumhuriyeti</strong>
+                                <span id="game-country-government">Cumhuriyet</span>
+                            </div>
+                        </div>
+
+                        <div class="game-resources">
+
+                            <div class="resource-item">
+                                <span class="resource-icon">◈</span>
+                                <div>
+                                    <strong id="resource-money">0</strong>
+                                    <small>HAZİNE</small>
+                                </div>
+                            </div>
+
+                            <div class="resource-item">
+                                <span class="resource-icon">⚒</span>
+                                <div>
+                                    <strong id="resource-production">0</strong>
+                                    <small>ÜRETİM</small>
+                                </div>
+                            </div>
+
+                            <div class="resource-item">
+                                <span class="resource-icon">♟</span>
+                                <div>
+                                    <strong id="resource-population">0</strong>
+                                    <small>NÜFUS</small>
+                                </div>
+                            </div>
+
+                            <div class="resource-item">
+                                <span class="resource-icon">⚖</span>
+                                <div>
+                                    <strong id="resource-stability">0%</strong>
+                                    <small>İSTİKRAR</small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="game-clock">
+                            <div>
+                                <span class="clock-label">TARİH</span>
+                                <strong id="game-date">1923</strong>
+                            </div>
+
+                            <button id="game-pause-button" class="game-pause-button">Ⅱ</button>
+                            <button class="game-speed-button active" data-speed="1">1×</button>
+                            <button class="game-speed-button" data-speed="2">2×</button>
+                            <button class="game-speed-button" data-speed="3">3×</button>
+                        </div>
+
+                    </div>
+
+
+                    <!-- OYUN GÖVDESİ -->
+                    <div class="game-body">
+
+                        <!-- SOL MENÜ -->
+                        <aside class="game-sidebar">
+
+                            <div class="game-sidebar-title">DEVLET YÖNETİMİ</div>
+
+                            <button class="game-tab active" data-game-tab="overview">
+                                <span>⌂</span> Genel Bakış
+                            </button>
+
+                            <button class="game-tab" data-game-tab="provinces">
+                                <span>▦</span> Şehirler ve Bölgeler
+                            </button>
+
+                            <button class="game-tab" data-game-tab="economy">
+                                <span>◈</span> Ekonomi
+                            </button>
+
+                            <button class="game-tab" data-game-tab="diplomacy">
+                                <span>♜</span> Diplomasi
+                            </button>
+
+                            <button class="game-tab" data-game-tab="research">
+                                <span>⌬</span> Araştırmalar
+                            </button>
+
+                            <button class="game-tab" data-game-tab="military">
+                                <span>⚔</span> Savunma
+                            </button>
+
+                            <button class="game-tab" data-game-tab="statistics">
+                                <span>▤</span> İstatistikler
+                            </button>
+
+                            <div class="game-sidebar-divider"></div>
+
+                            <button id="save-game-button" class="game-sidebar-action">
+                                <span>▣</span> Oyunu Kaydet
+                            </button>
+
+                            <button id="exit-game-button" class="game-sidebar-action">
+                                <span>↩</span> Ana Menüye Dön
+                            </button>
+
+                        </aside>
+
+
+                        <!-- OYUN ANA ALANI -->
+                        <div class="game-main">
+
+                            <div class="game-main-header">
+                                <div>
+                                    <span class="eyebrow" id="game-section-eyebrow">DEVLETİNİN DURUMU</span>
+                                    <h2 id="game-section-title">Genel Bakış</h2>
+                                </div>
+
+                                <div class="game-notification-area">
+                                    <button id="game-notifications-button" class="icon-button">♢</button>
+                                    <span id="notification-count" class="notification-count">0</span>
+                                </div>
+                            </div>
+
+                            <!-- GENEL BAKIŞ -->
+                            <div id="game-panel-overview" class="game-panel active">
+
+                                <div class="overview-welcome">
+                                    <div>
+                                        <span class="eyebrow">DEVLETİNİN YÖNETİM MERKEZİ</span>
+                                        <h3 id="overview-country-title">Türkiye Cumhuriyeti</h3>
+                                        <p id="overview-country-description">
+                                            Devletinin gelişimini buradan takip edebilirsin.
+                                        </p>
+                                    </div>
+                                    <div id="overview-flag" class="overview-flag">🇹🇷</div>
+                                </div>
+
+                                <div class="overview-stat-grid">
+
+                                    <div class="overview-stat">
+                                        <span>Hazine</span>
+                                        <strong id="overview-money">0</strong>
+                                        <small>Ekonomik kaynak</small>
+                                    </div>
+
+                                    <div class="overview-stat">
+                                        <span>Nüfus</span>
+                                        <strong id="overview-population">0</strong>
+                                        <small>Toplam nüfus</small>
+                                    </div>
+
+                                    <div class="overview-stat">
+                                        <span>Üretim</span>
+                                        <strong id="overview-production">0</strong>
+                                        <small>Üretim kapasitesi</small>
+                                    </div>
+
+                                    <div class="overview-stat">
+                                        <span>İstikrar</span>
+                                        <strong id="overview-stability">0%</strong>
+                                        <small>Devlet istikrarı</small>
+                                    </div>
+
+                                </div>
+
+                                <div class="game-content-columns">
+
+                                    <div class="game-content-card">
+                                        <div class="game-card-heading">
+                                            <h3>Devlet Bilgileri</h3>
+                                            <span>GENEL</span>
+                                        </div>
+
+                                        <div id="overview-country-details" class="details-list"></div>
+                                    </div>
+
+                                    <div class="game-content-card">
+                                        <div class="game-card-heading">
+                                            <h3>Aktif Gelişmeler</h3>
+                                            <span>OLAYLAR</span>
+                                        </div>
+
+                                        <div id="overview-events" class="event-list"></div>
+                                    </div>
+
+                                </div>
+
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Son Gelişmeler</h3>
+                                        <span>DEVLET GÜNLÜĞÜ</span>
+                                    </div>
+
+                                    <div id="game-event-log" class="event-log"></div>
+                                </div>
+
+                            </div>
+
+
+                            <!-- ŞEHİRLER -->
+                            <div id="game-panel-provinces" class="game-panel">
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Şehirler ve Bölgeler</h3>
+                                        <span>YÖNETİM</span>
+                                    </div>
+                                    <p class="panel-description">
+                                        Bölgelerini seç, şehirlerinin durumunu incele ve gelişimlerini planla.
+                                    </p>
+                                    <div id="province-list" class="province-grid"></div>
+                                    <div id="province-detail" class="province-detail"></div>
+                                </div>
+                            </div>
+
+
+                            <!-- EKONOMİ -->
+                            <div id="game-panel-economy" class="game-panel">
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Ekonomi Yönetimi</h3>
+                                        <span>HAZİNE</span>
+                                    </div>
+
+                                    <div id="economy-summary" class="economy-summary"></div>
+
+                                    <h3 class="subsection-title">Yatırımlar</h3>
+                                    <div id="building-list" class="building-grid"></div>
+                                </div>
+                            </div>
+
+
+                            <!-- DİPLOMASİ -->
+                            <div id="game-panel-diplomacy" class="game-panel">
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Diplomatik İlişkiler</h3>
+                                        <span>DIŞ İLİŞKİLER</span>
+                                    </div>
+
+                                    <p class="panel-description">
+                                        Diğer devletlerle ilişkilerini geliştir ve diplomatik anlaşmalar yap.
+                                    </p>
+
+                                    <div id="diplomacy-list" class="diplomacy-list"></div>
+                                </div>
+                            </div>
+
+
+                            <!-- ARAŞTIRMA -->
+                            <div id="game-panel-research" class="game-panel">
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Bilim ve Araştırma</h3>
+                                        <span>GELİŞİM</span>
+                                    </div>
+
+                                    <p class="panel-description">
+                                        Devletinin teknolojisini ve kurumsal kapasitesini geliştir.
+                                    </p>
+
+                                    <div id="research-list" class="research-grid"></div>
+                                </div>
+                            </div>
+
+
+                            <!-- SAVUNMA -->
+                            <div id="game-panel-military" class="game-panel">
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Ulusal Savunma</h3>
+                                        <span>GÜVENLİK</span>
+                                    </div>
+
+                                    <p class="panel-description">
+                                        Savunma bütçeni, personelini ve güvenlik kapasiteni yönet.
+                                    </p>
+
+                                    <div id="military-summary" class="military-summary"></div>
+                                    <div id="military-actions" class="military-actions"></div>
+                                </div>
+                            </div>
+
+
+                            <!-- İSTATİSTİKLER -->
+                            <div id="game-panel-statistics" class="game-panel">
+                                <div class="game-content-card">
+                                    <div class="game-card-heading">
+                                        <h3>Devlet İstatistikleri</h3>
+                                        <span>VERİLER</span>
+                                    </div>
+
+                                    <div id="statistics-content" class="statistics-content"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+
+        <!-- ALT BİLGİ -->
+        <footer class="site-footer">
+            <div class="footer-brand">
+                <span>✦</span>
+                <strong>TÜRK TARİHİ ATLASI</strong>
+            </div>
+
+            <p>Tarihi keşfet. Geleceği yönet.</p>
+
+            <div class="footer-bottom">
+                <span>© 2026 Türk Tarihi Atlası</span>
+                <span>Bağımsız tarih ve strateji projesi</span>
+            </div>
+        </footer>
+
+    </div>
+
+
+    <!-- BİLDİRİM -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+
+    <!-- GENEL MODAL -->
+    <div id="general-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-modal="general-modal"></div>
+
+        <div class="modal-content">
+            <button class="modal-close" data-close-modal="general-modal">×</button>
+            <div id="general-modal-body"></div>
         </div>
-      </div>
-      <p class="game-note">Bilgilendirme: Strateji bölümü tarihî dönemlerden esinlenen kurgusal bir simülasyondur. Oyun içi değerler tarihî istatistik veya gerçek askerî güç verisi değildir.</p>
-    </section>
+    </div>
 
-    <section class="closing-banner">
-      <div class="closing-pattern"></div>
-      <div class="closing-content">
-        <span class="eyebrow">GEÇMİŞTEN GELECEĞE</span>
-        <h2>Bir tarih, binlerce hikâye.</h2>
-        <p>Türk tarihinin izlerini keşfetmeye devam et.</p>
-        <a class="button button-primary" href="#home">Yukarı dön ↑</a>
-      </div>
-    </section>
-  </main>
 
-  <footer class="site-footer">
-    <a class="brand footer-brand" href="#home"><span class="brand-symbol">✥</span><span class="brand-copy"><strong>TÜRK TARİHİ ATLASI</strong><small>TURKIC WORLD</small></span></a>
-    <p>Türk tarihini öğrenmek, keşfetmek ve gelecek nesillere aktarmak için.</p>
-    <div class="footer-bottom"><span>© <span id="currentYear">2026</span> TÜRK TARİHİ ATLASI</span><span>TARİH · KÜLTÜR · COĞRAFYA</span></div>
-  </footer>
+    <!-- AYARLAR -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-backdrop" data-close-modal="settings-modal"></div>
 
-  <dialog class="state-dialog" id="stateDialog">
-    <button class="dialog-close" id="closeDialogButton" aria-label="Pencereyi kapat">×</button>
-    <div id="dialogContent"></div>
-  </dialog>
+        <div class="modal-content settings-modal-content">
+            <button class="modal-close" data-close-modal="settings-modal">×</button>
 
-  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+            <span class="eyebrow">UYGULAMA TERCİHLERİ</span>
+            <h2>Ayarlar</h2>
+
+            <div class="settings-list">
+
+                <label class="setting-row">
+                    <span>
+                        <strong>Ses efektleri</strong>
+                        <small>Arayüz seslerini etkinleştir.</small>
+                    </span>
+                    <input type="checkbox" id="setting-sound">
+                </label>
+
+                <label class="setting-row">
+                    <span>
+                        <strong>Animasyonlar</strong>
+                        <small>Arayüz geçişlerini etkinleştir.</small>
+                    </span>
+                    <input type="checkbox" id="setting-animations" checked>
+                </label>
+
+                <label class="setting-row">
+                    <span>
+                        <strong>Otomatik kayıt</strong>
+                        <small>Oyun ilerlemesini otomatik kaydet.</small>
+                    </span>
+                    <input type="checkbox" id="setting-autosave" checked>
+                </label>
+
+            </div>
+
+            <button id="close-settings-button" class="primary-button">KAPAT</button>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="script.js"></script>
+
 </body>
 </html>
