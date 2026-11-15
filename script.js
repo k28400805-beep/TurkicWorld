@@ -1,2039 +1,1628 @@
 
-/* =========================================================
-   TÜRK TARİHİ ATLASI
-   Ana uygulama, tarih veri tabanı ve strateji motoru
-   ========================================================= */
-
 "use strict";
 
 /* =========================================================
-   1. TÜRK DEVLETLERİ VERİ TABANI
-   Tarihler yaklaşık kuruluş ve sona eriş tarihleridir.
-   Tartışmalı dönemler tarihî notlarla değerlendirilmelidir.
+   TÜRK TARİHİ ATLASI — TURKIC WORLD
+   Ana uygulama, tarih arşivi ve yönetim simülasyonu
    ========================================================= */
 
-const STATES = [
+const $ = (selector, parent = document) => parent.querySelector(selector);
+const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
 
-  // İLK TÜRK DEVLETLERİ
-
-  {
-    id: "asya-hun",
-    name: "Asya Hun Devleti",
-    period: "ancient",
-    start: -220,
-    end: 216,
-    date: "MÖ 220 – MS 216",
-    founder: "Teoman",
-    famous: "Mete Han",
-    capital: "Ötüken",
-    region: "Orta Asya",
-    symbol: "𐰴",
-    description: "Orta Asya'da güçlü bir siyasi birlik kuran ve Türk tarihinin erken dönemindeki önemli devletlerden biri kabul edilen Hun siyasi teşkilatı.",
-    history: "Asya Hun Devleti, bozkır coğrafyasında güçlü bir siyasi teşkilat oluşturdu. Mete Han döneminde askerî ve siyasi gücü arttı. Çin ile ilişkiler, bozkır hâkimiyeti ve İpek Yolu üzerindeki mücadeleler devletin tarihinde önemli yer tuttu.",
-    government: "Kağanlık",
-    economy: "Hayvancılık, ticaret ve savaş ganimetleri",
-    neighbors: "Han Hanedanı, çeşitli bozkır toplulukları",
-    playable: true,
-    money: 120,
-    army: 85,
-    stability: 75,
-    economyValue: 65,
-    color: "#b58a4a",
-    map: { x: 65, y: 35 }
-  },
-
-  {
-    id: "avrupa-hun",
-    name: "Avrupa Hun Devleti",
-    period: "ancient",
-    start: 370,
-    end: 469,
-    date: "370 – 469",
-    founder: "Balamir",
-    famous: "Attila",
-    capital: "Orta Avrupa'daki merkezler",
-    region: "Orta ve Doğu Avrupa",
-    symbol: "♜",
-    description: "Avrupa'da etkili olmuş, Attila döneminde gücünün zirvesine ulaşmış Hun devleti.",
-    history: "Avrupa Hunları, Kavimler Göçü sürecinde Avrupa'nın siyasi yapısını etkiledi. Attila döneminde Doğu ve Batı Roma ile önemli mücadeleler ve diplomatik ilişkiler yürütüldü.",
-    government: "Kağanlık",
-    economy: "Hayvancılık, ticaret ve vergi",
-    neighbors: "Doğu Roma, Batı Roma, Germen toplulukları",
-    playable: true,
-    money: 100,
-    army: 90,
-    stability: 70,
-    economyValue: 60,
-    color: "#a76e54",
-    map: { x: 46, y: 32 }
-  },
-
-  {
-    id: "gokturk",
-    name: "Göktürk Kağanlığı",
-    period: "ancient",
-    start: 552,
-    end: 744,
-    date: "552 – 744",
-    founder: "Bumin Kağan",
-    famous: "Bilge Kağan",
-    capital: "Ötüken",
-    region: "Orta Asya",
-    symbol: "𐰜",
-    description: "Türk adını devlet adı olarak kullanan ilk siyasi teşkilat.",
-    history: "Göktürk Kağanlığı, Bumin Kağan tarafından kuruldu. İstemi Yabgu batı yönündeki ilişkilerde önemli rol oynadı. Orhun Yazıtları, Göktürk tarihinin en önemli yazılı kaynakları arasındadır.",
-    government: "Kağanlık",
-    economy: "Hayvancılık, demircilik ve İpek Yolu ticareti",
-    neighbors: "Çin hanedanları, Sasani Devleti, Bizans",
-    playable: true,
-    money: 135,
-    army: 90,
-    stability: 80,
-    economyValue: 75,
-    color: "#4c8b9a",
-    map: { x: 66, y: 38 }
-  },
-
-  {
-    id: "ikinci-gokturk",
-    name: "II. Göktürk Kağanlığı",
-    period: "ancient",
-    start: 682,
-    end: 744,
-    date: "682 – 744",
-    founder: "Kutluk Kağan",
-    famous: "Bilge Kağan",
-    capital: "Ötüken",
-    region: "Orta Asya",
-    symbol: "𐱅",
-    description: "Göktürk siyasi birliğini yeniden kuran ikinci dönem kağanlığı.",
-    history: "Kutluk Kağan, Çin hâkimiyetine karşı mücadele ederek bağımsızlığı yeniden sağladı. Tonyukuk, Bilge Kağan ve Kül Tigin dönemin öne çıkan isimleridir.",
-    government: "Kağanlık",
-    economy: "Hayvancılık ve ticaret",
-    neighbors: "Tang Hanedanı, Uygurlar",
-    playable: true,
-    money: 100,
-    army: 85,
-    stability: 75,
-    economyValue: 65,
-    color: "#4c8b9a",
-    map: { x: 66, y: 38 }
-  },
-
-  {
-    id: "uygur",
-    name: "Uygur Kağanlığı",
-    period: "ancient",
-    start: 744,
-    end: 840,
-    date: "744 – 840",
-    founder: "Kutluk Bilge Kül Kağan",
-    famous: "Moyun Çor",
-    capital: "Ordu-Balık",
-    region: "Moğolistan ve Orta Asya",
-    symbol: "𐰇",
-    description: "Yerleşik hayat, şehirleşme, ticaret ve kültür alanlarında önemli gelişmeler gösteren Türk devleti.",
-    history: "Uygurlar döneminde şehirleşme, yazı, sanat ve ticaret gelişti. Maniheizm devletin kültürel hayatını etkiledi. 840 yılında Kırgız saldırısı sonucunda kağanlık sona erdi.",
-    government: "Kağanlık",
-    economy: "Tarım, hayvancılık, el sanatları ve ticaret",
-    neighbors: "Kırgızlar, Tang Hanedanı",
-    playable: true,
-    money: 145,
-    army: 65,
-    stability: 80,
-    economyValue: 90,
-    color: "#b28b53",
-    map: { x: 68, y: 39 }
-  },
-
-  {
-    id: "hazar",
-    name: "Hazar Kağanlığı",
-    period: "ancient",
-    start: 650,
-    end: 969,
-    date: "7. – 10. yüzyıllar",
-    founder: "Hazar hanedanı",
-    famous: "Bulan Kağan",
-    capital: "İtil",
-    region: "Hazar Denizi çevresi",
-    symbol: "◈",
-    description: "Doğu Avrupa ve Kafkasya'da ticaret yolları üzerinde etkili olan Türk kağanlığı.",
-    history: "Hazar Kağanlığı, Karadeniz'in kuzeyi ile Hazar Denizi çevresinde siyasi ve ekonomik güç oluşturdu. Bizans ve Arap devletleriyle ilişkiler kurdu.",
-    government: "Kağanlık",
-    economy: "Ticaret, gümrük gelirleri ve hayvancılık",
-    neighbors: "Bizans, Arap devletleri, Slav toplulukları",
-    playable: true,
-    money: 150,
-    army: 70,
-    stability: 80,
-    economyValue: 85,
-    color: "#9a8655",
-    map: { x: 53, y: 39 }
-  },
-
-  {
-    id: "avar",
-    name: "Avar Kağanlığı",
-    period: "ancient",
-    start: 567,
-    end: 822,
-    date: "567 – 822",
-    founder: "Bayan Kağan",
-    famous: "Bayan Kağan",
-    capital: "Orta Avrupa merkezleri",
-    region: "Orta Avrupa",
-    symbol: "♜",
-    description: "Avrupa tarihinde etkili olmuş, Orta Avrupa'da siyasi güç kurmuş kağanlık.",
-    history: "Avarlar, Orta Avrupa'da uzun süre etkili oldu. Bizans ile mücadeleler yürüttüler ve Slav topluluklarının siyasi tarihini etkilediler.",
-    government: "Kağanlık",
-    economy: "Hayvancılık ve ticaret",
-    neighbors: "Bizans, Franklar, Slav toplulukları",
-    playable: true,
-    money: 100,
-    army: 80,
-    stability: 70,
-    economyValue: 65,
-    color: "#92704c",
-    map: { x: 47, y: 33 }
-  },
-
-  {
-    id: "bulgar",
-    name: "Büyük Bulgar Devleti",
-    period: "ancient",
-    start: 632,
-    end: 668,
-    date: "632 – 668",
-    founder: "Kubrat Han",
-    famous: "Kubrat Han",
-    capital: "Phanagoria",
-    region: "Karadeniz'in kuzeyi",
-    symbol: "✥",
-    description: "Karadeniz'in kuzeyinde Kubrat Han tarafından kurulan Bulgar siyasi birliği.",
-    history: "Kubrat Han'ın ölümünden sonra devletin siyasi birliği zayıfladı. Bulgar toplulukları farklı bölgelere yayılarak yeni siyasi yapılar oluşturdu.",
-    government: "Hanlık",
-    economy: "Hayvancılık ve ticaret",
-    neighbors: "Hazarlar, Bizans",
-    playable: true,
-    money: 95,
-    army: 70,
-    stability: 65,
-    economyValue: 60,
-    color: "#a77a52",
-    map: { x: 49, y: 38 }
-  },
-
-  {
-    id: "kirgiz",
-    name: "Kırgız Kağanlığı",
-    period: "ancient",
-    start: 840,
-    end: 1207,
-    date: "840 – 1207",
-    founder: "Kırgız hükümdarları",
-    famous: "Bars Bek",
-    capital: "Yenisey bölgesi",
-    region: "Yenisey ve Orta Asya",
-    symbol: "✥",
-    description: "Yenisey çevresinde gelişen ve Uygur Kağanlığı'nın yıkılmasında etkili olan Türk siyasi teşkilatı.",
-    history: "Kırgızlar, Yenisey bölgesinde güçlü bir siyasi yapı oluşturdu. 840 yılında Uygur Kağanlığı'nın merkezini ele geçirdiler.",
-    government: "Kağanlık",
-    economy: "Hayvancılık ve ticaret",
-    neighbors: "Uygurlar, Moğol toplulukları",
-    playable: true,
-    money: 100,
-    army: 75,
-    stability: 70,
-    economyValue: 65,
-    color: "#7b9c9c",
-    map: { x: 70, y: 32 }
-  },
-
-  // TÜRK-İSLAM DEVLETLERİ
-
-  {
-    id: "karahanli",
-    name: "Karahanlı Devleti",
-    period: "medieval",
-    start: 840,
-    end: 1212,
-    date: "840 – 1212",
-    founder: "Bilinen ilk hükümdarları farklı kaynaklarda değişir",
-    famous: "Satuk Buğra Han",
-    capital: "Balasagun ve Kaşgar",
-    region: "Türkistan",
-    symbol: "✥",
-    description: "Türk tarihinde İslamiyet'i kabul eden ilk büyük Türk hanedanlarından biri.",
-    history: "Karahanlılar döneminde Türk dili ve kültürü gelişti. Yusuf Has Hacib'in Kutadgu Bilig'i ve Kaşgarlı Mahmud'un Divânu Lugâti't-Türk'ü bu kültür çevresinin önemli eserleridir.",
-    government: "Hanlık",
-    economy: "Tarım, ticaret ve zanaat",
-    neighbors: "Gazneliler, Büyük Selçuklular",
-    playable: true,
-    money: 120,
-    army: 70,
-    stability: 80,
-    economyValue: 80,
-    color: "#8e9b70",
-    map: { x: 68, y: 45 }
-  },
-
-  {
-    id: "gazneli",
-    name: "Gazneli Devleti",
-    period: "medieval",
-    start: 963,
-    end: 1186,
-    date: "963 – 1186",
-    founder: "Alp Tigin",
-    famous: "Gazneli Mahmud",
-    capital: "Gazne",
-    region: "Afganistan ve Kuzey Hindistan",
-    symbol: "✥",
-    description: "Güney Asya ve İran coğrafyasında etkili olan Türk-İslam devleti.",
-    history: "Gazneliler, Gazne merkezli güçlü bir devlet kurdu. Sultan Mahmud döneminde Hindistan seferleri ve kültürel faaliyetler öne çıktı.",
-    government: "Sultanlık",
-    economy: "Tarım, ticaret ve vergi",
-    neighbors: "Karahanlılar, Selçuklular, Hint devletleri",
-    playable: true,
-    money: 135,
-    army: 85,
-    stability: 75,
-    economyValue: 75,
-    color: "#78966c",
-    map: { x: 69, y: 55 }
-  },
-
-  {
-    id: "buyuk-selcuklu",
-    name: "Büyük Selçuklu Devleti",
-    period: "medieval",
-    start: 1040,
-    end: 1157,
-    date: "1040 – 1157",
-    founder: "Tuğrul Bey",
-    famous: "Alp Arslan ve Melikşah",
-    capital: "İsfahan",
-    region: "İran, Irak ve Orta Asya",
-    symbol: "✥",
-    description: "Orta Doğu ve Türk-İslam tarihinde büyük siyasi ve kültürel etki oluşturan imparatorluk.",
-    history: "Dandanakan Savaşı sonrasında güçlenen Selçuklular, Alp Arslan döneminde Malazgirt Zaferi'ni kazandı. Melikşah döneminde devlet en geniş ve güçlü dönemlerinden birini yaşadı.",
-    government: "Sultanlık",
-    economy: "Tarım, ticaret, vergi ve zanaat",
-    neighbors: "Bizans, Karahanlılar, Gazneliler, Fatımiler",
-    playable: true,
-    money: 180,
-    army: 95,
-    stability: 85,
-    economyValue: 90,
-    color: "#9d8b52",
-    map: { x: 59, y: 52 }
-  },
-
-  {
-    id: "anadolu-selcuklu",
-    name: "Anadolu Selçuklu Devleti",
-    period: "medieval",
-    start: 1077,
-    end: 1308,
-    date: "1077 – 1308",
-    founder: "Kutalmışoğlu Süleyman Şah",
-    famous: "I. Alaeddin Keykubad",
-    capital: "Konya",
-    region: "Anadolu",
-    symbol: "✥",
-    description: "Anadolu'da Türk siyasi ve kültürel varlığının gelişmesinde önemli rol oynayan devlet.",
-    history: "Anadolu Selçukluları döneminde ticaret yolları, kervansaraylar, medreseler ve şehirler gelişti. 1243 Kösedağ Savaşı sonrasında Moğol baskısı arttı.",
-    government: "Sultanlık",
-    economy: "Tarım, ticaret, zanaat",
-    neighbors: "Bizans, Trabzon Rum Devleti, Moğollar",
-    playable: true,
-    money: 150,
-    army: 80,
-    stability: 75,
-    economyValue: 90,
-    color: "#6b9a8d",
-    map: { x: 48, y: 49 }
-  },
-
-  {
-    id: "harzemsah",
-    name: "Harzemşahlar Devleti",
-    period: "medieval",
-    start: 1077,
-    end: 1231,
-    date: "1077 – 1231",
-    founder: "Anuş Tigin",
-    famous: "Alaeddin Muhammed",
-    capital: "Gürgenç",
-    region: "Orta Asya ve İran",
-    symbol: "✥",
-    description: "Orta Asya ve İran'da geniş topraklara hâkim olmuş Türk hanedanı.",
-    history: "Harzemşahlar, özellikle Alaeddin Tekiş ve Alaeddin Muhammed dönemlerinde güç kazandı. Moğol istilası devletin yıkılmasında belirleyici oldu.",
-    government: "Sultanlık",
-    economy: "Tarım ve İpek Yolu ticareti",
-    neighbors: "Moğol İmparatorluğu, Abbasi Halifeliği",
-    playable: true,
-    money: 145,
-    army: 90,
-    stability: 60,
-    economyValue: 80,
-    color: "#779b85",
-    map: { x: 66, y: 46 }
-  },
-
-  {
-    id: "altin-orda",
-    name: "Altın Orda Devleti",
-    period: "medieval",
-    start: 1242,
-    end: 1502,
-    date: "13. – 16. yüzyıllar",
-    founder: "Batu Han",
-    famous: "Özbek Han",
-    capital: "Saray",
-    region: "Doğu Avrupa ve Deşt-i Kıpçak",
-    symbol: "♜",
-    description: "Cengiz Han'ın torunları tarafından kurulan ve zamanla Türkleşen önemli bozkır devleti.",
-    history: "Altın Orda, Doğu Avrupa ve Karadeniz'in kuzeyinde etkili oldu. Türkçe ve Türk kültürü devletin gelişiminde önemli yer tuttu.",
-    government: "Hanlık",
-    economy: "Ticaret, hayvancılık ve vergi",
-    neighbors: "Rus knezlikleri, Memlükler, Timur Devleti",
-    playable: true,
-    money: 150,
-    army: 90,
-    stability: 70,
-    economyValue: 80,
-    color: "#9c8252",
-    map: { x: 52, y: 30 }
-  },
-
-  {
-    id: "cagatay",
-    name: "Çağatay Hanlığı",
-    period: "medieval",
-    start: 1225,
-    end: 1687,
-    date: "1225 – 1687",
-    founder: "Çağatay Han",
-    famous: "Tuğluk Timur",
-    capital: "Almalık",
-    region: "Türkistan",
-    symbol: "♜",
-    description: "Orta Asya'da Cengiz Han'ın Çağatay kolundan gelişen hanlık.",
-    history: "Çağatay Hanlığı, zaman içinde siyasi bölünmeler yaşadı. Doğu ve batı bölgelerinde farklı yönetimler ortaya çıktı.",
-    government: "Hanlık",
-    economy: "Hayvancılık, tarım ve ticaret",
-    neighbors: "Timur Devleti, Moğolistan",
-    playable: true,
-    money: 105,
-    army: 75,
-    stability: 65,
-    economyValue: 70,
-    color: "#a78a55",
-    map: { x: 70, y: 45 }
-  },
-
-  {
-    id: "timur",
-    name: "Timur İmparatorluğu",
-    period: "medieval",
-    start: 1370,
-    end: 1507,
-    date: "1370 – 1507",
-    founder: "Timur",
-    famous: "Timur",
-    capital: "Semerkant",
-    region: "Orta Asya, İran ve çevresi",
-    symbol: "♜",
-    description: "Timur tarafından kurulan ve kısa sürede geniş coğrafyaya yayılan imparatorluk.",
-    history: "Timur, Semerkant merkezli güçlü bir siyasi ve askerî yapı kurdu. 1402 Ankara Savaşı, Osmanlı tarihini de etkileyen önemli bir dönüm noktası oldu.",
-    government: "İmparatorluk",
-    economy: "Ticaret, tarım ve zanaat",
-    neighbors: "Osmanlı, Altın Orda, Memlükler",
-    playable: true,
-    money: 170,
-    army: 95,
-    stability: 75,
-    economyValue: 85,
-    color: "#9d8050",
-    map: { x: 70, y: 48 }
-  },
-
-  {
-    id: "memluk",
-    name: "Memlük Sultanlığı",
-    period: "medieval",
-    start: 1250,
-    end: 1517,
-    date: "1250 – 1517",
-    founder: "Memlük emirleri",
-    famous: "Baybars",
-    capital: "Kahire",
-    region: "Mısır ve Suriye",
-    symbol: "♜",
-    description: "Türk ve Çerkes kökenli askerî yönetici sınıfların hüküm sürdüğü sultanlık.",
-    history: "Memlükler, Ayn Calut Savaşı'nda Moğol ilerleyişini durdurdu. Osmanlı Devleti ile 16. yüzyılda karşı karşıya geldi.",
-    government: "Sultanlık",
-    economy: "Tarım ve ticaret",
-    neighbors: "Osmanlı, İlhanlılar, Haçlı kalıntıları",
-    playable: true,
-    money: 145,
-    army: 85,
-    stability: 70,
-    economyValue: 80,
-    color: "#8c9b70",
-    map: { x: 50, y: 64 }
-  },
-
-  // DİĞER TÜRK HANEDAN VE DEVLETLERİ
-
-  {
-    id: "karakoyunlu",
-    name: "Karakoyunlu Devleti",
-    period: "medieval",
-    start: 1375,
-    end: 1468,
-    date: "1375 – 1468",
-    founder: "Bayram Hoca",
-    famous: "Kara Yusuf",
-    capital: "Tebriz",
-    region: "Doğu Anadolu ve Azerbaycan",
-    symbol: "♜",
-    description: "Doğu Anadolu, Azerbaycan ve İran'ın bazı bölgelerinde hüküm süren Türkmen devleti.",
-    history: "Karakoyunlular, Akkoyunlular ve Timur Devleti ile mücadele etti. Cihan Şah döneminde önemli bir güç hâline geldi.",
-    government: "Türkmen hanedanlığı",
-    economy: "Hayvancılık ve ticaret",
-    neighbors: "Akkoyunlular, Timur Devleti",
-    playable: true,
-    money: 110,
-    army: 80,
-    stability: 65,
-    economyValue: 65,
-    color: "#826f9b",
-    map: { x: 55, y: 52 }
-  },
-
-  {
-    id: "akkoyunlu",
-    name: "Akkoyunlu Devleti",
-    period: "medieval",
-    start: 1378,
-    end: 1501,
-    date: "1378 – 1501",
-    founder: "Kara Yülük Osman",
-    famous: "Uzun Hasan",
-    capital: "Diyarbakır ve Tebriz",
-    region: "Doğu Anadolu ve İran",
-    symbol: "♜",
-    description: "Anadolu ve İran coğrafyasında etkili olmuş Türkmen devleti.",
-    history: "Uzun Hasan döneminde Akkoyunlular güçlendi. Osmanlı Devleti ile Otlukbeli Savaşı'nda karşı karşıya geldiler.",
-    government: "Türkmen hanedanlığı",
-    economy: "Hayvancılık, tarım ve ticaret",
-    neighbors: "Osmanlı, Karakoyunlular, Timurîler",
-    playable: true,
-    money: 125,
-    army: 80,
-    stability: 70,
-    economyValue: 75,
-    color: "#73946d",
-    map: { x: 55, y: 51 }
-  },
-
-  {
-    id: "babur",
-    name: "Babür İmparatorluğu",
-    period: "empire",
-    start: 1526,
-    end: 1857,
-    date: "1526 – 1857",
-    founder: "Babür Şah",
-    famous: "Ekber Şah",
-    capital: "Agra ve Delhi",
-    region: "Hindistan",
-    symbol: "♜",
-    description: "Türk-Moğol hanedan geleneğinden gelen Babür tarafından Hindistan'da kurulan imparatorluk.",
-    history: "Babür, 1526 Panipat Savaşı sonrasında Hindistan'da imparatorluğun temelini attı. Ekber Şah döneminde yönetim ve kültür alanında önemli gelişmeler yaşandı.",
-    government: "İmparatorluk",
-    economy: "Tarım, ticaret ve zanaat",
-    neighbors: "Safeviler, Deccan devletleri",
-    playable: true,
-    money: 190,
-    army: 90,
-    stability: 85,
-    economyValue: 95,
-    color: "#b28b4f",
-    map: { x: 74, y: 61 }
-  },
-
-  // OSMANLI DÖNEMİ
-
-  {
-    id: "osmanli",
-    name: "Osmanlı Devleti",
-    period: "empire",
-    start: 1299,
-    end: 1922,
-    date: "1299 – 1922",
-    founder: "Osman Gazi",
-    famous: "Fatih Sultan Mehmet ve Kanuni Sultan Süleyman",
-    capital: "Bursa, Edirne, İstanbul",
-    region: "Anadolu, Balkanlar, Orta Doğu ve Kuzey Afrika",
-    symbol: "☪",
-    description: "Yaklaşık altı yüzyıl boyunca üç kıtada hüküm süren büyük Türk imparatorluğu.",
-    history: "Osmanlı Devleti, 1299 civarında Osman Gazi'nin liderliğinde ortaya çıktı. Bursa'nın fethi, İstanbul'un fethi, yükselme dönemi, reform hareketleri ve son dönem savaşları devlet tarihinin önemli başlıklarıdır.",
-    government: "Beylikten imparatorluğa uzanan monarşik yönetim",
-    economy: "Tarım, ticaret, zanaat ve vergiler",
-    neighbors: "Bizans, Balkan devletleri, Safeviler, Memlükler, Avrupa devletleri",
-    playable: true,
-    money: 200,
-    army: 100,
-    stability: 85,
-    economyValue: 90,
-    color: "#a54e4e",
-    map: { x: 48, y: 48 }
-  },
-
-  {
-    id: "safevi",
-    name: "Safevi Devleti",
-    period: "empire",
-    start: 1501,
-    end: 1736,
-    date: "1501 – 1736",
-    founder: "Şah İsmail",
-    famous: "Şah Abbas",
-    capital: "Tebriz ve İsfahan",
-    region: "İran ve Kafkasya",
-    symbol: "✥",
-    description: "Azerbaycan ve İran coğrafyasında kurulmuş, Türk hanedanı tarafından yönetilen devlet.",
-    history: "Safevi Devleti, Şah İsmail tarafından kuruldu. Osmanlı ile özellikle Doğu Anadolu ve Kafkasya çevresinde siyasi ve askerî rekabet yaşadı.",
-    government: "Şahlık",
-    economy: "Tarım, ticaret ve ipek üretimi",
-    neighbors: "Osmanlı, Özbek Hanlığı, Babürler",
-    playable: true,
-    money: 155,
-    army: 90,
-    stability: 80,
-    economyValue: 85,
-    color: "#8d6d91",
-    map: { x: 60, y: 54 }
-  },
-
-  // MODERN TÜRK DEVLETLERİ
-
-  {
-    id: "turkiye",
-    name: "Türkiye Cumhuriyeti",
-    period: "modern",
-    start: 1923,
-    end: 2026,
-    date: "1923 – Günümüz",
-    founder: "Mustafa Kemal Atatürk",
-    famous: "Mustafa Kemal Atatürk",
-    capital: "Ankara",
-    region: "Anadolu ve Doğu Trakya",
-    symbol: "★",
-    description: "29 Ekim 1923'te ilan edilen, bağımsız ve egemen Türkiye Cumhuriyeti.",
-    history: "Türkiye Cumhuriyeti, Millî Mücadele'nin ardından kuruldu. Mustafa Kemal Atatürk ilk cumhurbaşkanı oldu. Cumhuriyetin ilanı, hukuk, eğitim, ekonomi ve toplumsal yaşam alanlarında önemli değişimlerin başlangıcı oldu.",
-    government: "Cumhuriyet",
-    economy: "Sanayi, tarım, hizmetler ve teknoloji",
-    neighbors: "Yunanistan, Bulgaristan, Gürcistan, Ermenistan, Azerbaycan, İran, Irak, Suriye",
-    playable: true,
-    money: 220,
-    army: 90,
-    stability: 85,
-    economyValue: 90,
-    color: "#b44e55",
-    map: { x: 50, y: 48 }
-  },
-
-  {
-    id: "azerbaycan",
-    name: "Azerbaycan Cumhuriyeti",
-    period: "modern",
-    start: 1991,
-    end: 2026,
-    date: "1991 – Günümüz",
-    founder: "Bağımsızlık sürecinin liderleri",
-    famous: "Haydar Aliyev",
-    capital: "Bakü",
-    region: "Kafkasya",
-    symbol: "☪",
-    description: "1991 yılında Sovyetler Birliği'nin dağılmasıyla bağımsızlığını yeniden kazanan Türk devleti.",
-    history: "Azerbaycan, 1918 yılında Azerbaycan Demokratik Cumhuriyeti'ni kurdu. Sovyet döneminin ardından 1991'de bağımsızlığını yeniden ilan etti.",
-    government: "Cumhuriyet",
-    economy: "Enerji, sanayi, tarım ve hizmetler",
-    neighbors: "Türkiye, Gürcistan, Ermenistan, İran, Rusya",
-    playable: true,
-    money: 150,
-    army: 75,
-    stability: 80,
-    economyValue: 85,
-    color: "#5795a8",
-    map: { x: 55, y: 47 }
-  },
-
-  {
-    id: "kazakistan",
-    name: "Kazakistan Cumhuriyeti",
-    period: "modern",
-    start: 1991,
-    end: 2026,
-    date: "1991 – Günümüz",
-    founder: "Bağımsızlık dönemi liderleri",
-    famous: "Nursultan Nazarbayev",
-    capital: "Astana",
-    region: "Orta Asya",
-    symbol: "☀",
-    description: "Orta Asya'nın geniş yüzölçümüne sahip bağımsız Türk cumhuriyeti.",
-    history: "Kazakistan, 16 Aralık 1991'de bağımsızlığını ilan etti. Enerji kaynakları, madenler ve geniş bozkır coğrafyası ülke ekonomisinde önem taşır.",
-    government: "Cumhuriyet",
-    economy: "Enerji, madencilik, tarım ve sanayi",
-    neighbors: "Rusya, Çin, Kırgızistan, Özbekistan, Türkmenistan",
-    playable: true,
-    money: 190,
-    army: 75,
-    stability: 85,
-    economyValue: 90,
-    color: "#5c9db0",
-    map: { x: 70, y: 40 }
-  },
-
-  {
-    id: "kirgizistan",
-    name: "Kırgızistan Cumhuriyeti",
-    period: "modern",
-    start: 1991,
-    end: 2026,
-    date: "1991 – Günümüz",
-    founder: "Bağımsızlık dönemi liderleri",
-    famous: "Askar Akayev",
-    capital: "Bişkek",
-    region: "Orta Asya",
-    symbol: "☀",
-    description: "Dağlık coğrafyası ve köklü göçebe kültürüyle tanınan bağımsız Türk cumhuriyeti.",
-    history: "Kırgızistan, 1991'de bağımsızlığını ilan etti. Ülkenin kültürel mirasında Manas Destanı önemli bir yere sahiptir.",
-    government: "Cumhuriyet",
-    economy: "Tarım, madencilik ve hizmetler",
-    neighbors: "Kazakistan, Özbekistan, Tacikistan, Çin",
-    playable: true,
-    money: 100,
-    army: 55,
-    stability: 70,
-    economyValue: 60,
-    color: "#a95b58",
-    map: { x: 72, y: 48 }
-  },
-
-  {
-    id: "ozbekistan",
-    name: "Özbekistan Cumhuriyeti",
-    period: "modern",
-    start: 1991,
-    end: 2026,
-    date: "1991 – Günümüz",
-    founder: "Bağımsızlık dönemi liderleri",
-    famous: "İslam Kerimov",
-    capital: "Taşkent",
-    region: "Orta Asya",
-    symbol: "☪",
-    description: "Semerkant ve Buhara gibi tarihî merkezlere sahip bağımsız Türk cumhuriyeti.",
-    history: "Özbekistan, 1991'de bağımsızlığını ilan etti. Semerkant, Buhara ve Hive gibi şehirler ülkenin tarihî ve kültürel mirasında önemli yer tutar.",
-    government: "Cumhuriyet",
-    economy: "Tarım, tekstil, madencilik ve sanayi",
-    neighbors: "Kazakistan, Kırgızistan, Tacikistan, Afganistan, Türkmenistan",
-    playable: true,
-    money: 135,
-    army: 70,
-    stability: 80,
-    economyValue: 75,
-    color: "#559a9a",
-    map: { x: 68, y: 49 }
-  },
-
-  {
-    id: "turkmenistan",
-    name: "Türkmenistan",
-    period: "modern",
-    start: 1991,
-    end: 2026,
-    date: "1991 – Günümüz",
-    founder: "Bağımsızlık dönemi liderleri",
-    famous: "Saparmurat Türkmenbaşı",
-    capital: "Aşkabat",
-    region: "Orta Asya",
-    symbol: "✥",
-    description: "Halı kültürü, tarihî Türkmen toplulukları ve doğal gaz kaynaklarıyla tanınan Türk devleti.",
-    history: "Türkmenistan, 1991 yılında bağımsızlığını ilan etti. Ülke, doğal gaz kaynakları ve tarihî Türkmen kültürüyle öne çıkar.",
-    government: "Cumhuriyet",
-    economy: "Doğal gaz, petrol, tarım ve tekstil",
-    neighbors: "Kazakistan, Özbekistan, Afganistan, İran",
-    playable: true,
-    money: 145,
-    army: 65,
-    stability: 80,
-    economyValue: 85,
-    color: "#5b9a79",
-    map: { x: 63, y: 52 }
-  }
-];
-
-
-/* =========================================================
-   2. TARİHÎ OLAYLAR
-   ========================================================= */
-
-const EVENTS = [
-
-  {
-    year: -220,
-    title: "Asya Hun Devleti'nin ortaya çıkışı",
-    period: "ancient",
-    description: "Teoman döneminde Hun siyasi birliğinin temelleri atıldı."
-  },
-  {
-    year: -209,
-    title: "Mete Han dönemi",
-    period: "ancient",
-    description: "Mete Han döneminde Asya Hun Devleti askerî ve siyasi bakımdan güç kazandı."
-  },
-  {
-    year: 375,
-    title: "Kavimler Göçü",
-    period: "ancient",
-    description: "Avrupa'nın siyasi ve toplumsal yapısını etkileyen büyük göç hareketleri başladı."
-  },
-  {
-    year: 552,
-    title: "Göktürk Kağanlığı kuruldu",
-    period: "ancient",
-    description: "Bumin Kağan liderliğinde Göktürk siyasi teşkilatı ortaya çıktı."
-  },
-  {
-    year: 630,
-    title: "Doğu Göktürk Kağanlığı'nın Çin hâkimiyetine girmesi",
-    period: "ancient",
-    description: "Göktürk siyasi birliği geçici olarak zayıfladı."
-  },
-  {
-    year: 682,
-    title: "II. Göktürk Kağanlığı kuruldu",
-    period: "ancient",
-    description: "Kutluk Kağan bağımsızlığı yeniden sağladı."
-  },
-  {
-    year: 720,
-    title: "Orhun Yazıtları dönemi",
-    period: "ancient",
-    description: "Türk tarihinin en önemli yazılı kaynakları arasında yer alan yazıtlar oluşturuldu."
-  },
-  {
-    year: 744,
-    title: "Uygur Kağanlığı kuruldu",
-    period: "ancient",
-    description: "Uygurlar Orta Asya'da yeni bir siyasi güç hâline geldi."
-  },
-  {
-    year: 840,
-    title: "Uygur Kağanlığı'nın sona ermesi",
-    period: "ancient",
-    description: "Kırgız saldırısı sonrasında Uygur siyasi merkezi dağıldı."
-  },
-  {
-    year: 960,
-    title: "Karahanlılar döneminde İslamiyet",
-    period: "medieval",
-    description: "Karahanlı çevresinde İslamiyet'in yayılması hız kazandı."
-  },
-  {
-    year: 1040,
-    title: "Dandanakan Savaşı",
-    period: "medieval",
-    description: "Selçukluların Gaznelilere karşı kazandığı zafer, Büyük Selçuklu Devleti'nin güçlenmesini sağladı."
-  },
-  {
-    year: 1071,
-    title: "Malazgirt Zaferi",
-    period: "medieval",
-    description: "Alp Arslan liderliğindeki Selçuklular Bizans ordusunu mağlup etti."
-  },
-  {
-    year: 1077,
-    title: "Anadolu Selçuklu Devleti",
-    period: "medieval",
-    description: "Anadolu'da Selçuklu siyasi teşkilatı güç kazandı."
-  },
-  {
-    year: 1243,
-    title: "Kösedağ Savaşı",
-    period: "medieval",
-    description: "Anadolu Selçukluları Moğol ordusuna yenildi."
-  },
-  {
-    year: 1299,
-    title: "Osmanlı Beyliği'nin kuruluş dönemi",
-    period: "empire",
-    description: "Osman Gazi'nin liderliğindeki beylik, Osmanlı tarihinin başlangıcı kabul edilir."
-  },
-  {
-    year: 1453,
-    title: "İstanbul'un Fethi",
-    period: "empire",
-    description: "Fatih Sultan Mehmet İstanbul'u fethetti."
-  },
-  {
-    year: 1514,
-    title: "Çaldıran Savaşı",
-    period: "empire",
-    description: "Osmanlı ve Safevi orduları karşı karşıya geldi."
-  },
-  {
-    year: 1517,
-    title: "Mısır Seferi",
-    period: "empire",
-    description: "Osmanlı Devleti Memlük Sultanlığı'na son verdi."
-  },
-  {
-    year: 1526,
-    title: "Mohaç Meydan Muharebesi",
-    period: "empire",
-    description: "Kanuni Sultan Süleyman döneminde Osmanlı ordusu Macar ordusunu mağlup etti."
-  },
-  {
-    year: 1922,
-    title: "Saltanatın kaldırılması",
-    period: "modern",
-    description: "Osmanlı saltanatı kaldırıldı."
-  },
-  {
-    year: 1923,
-    title: "Türkiye Cumhuriyeti ilan edildi",
-    period: "modern",
-    description: "29 Ekim 1923'te Cumhuriyet ilan edildi ve Mustafa Kemal Atatürk ilk cumhurbaşkanı oldu."
-  },
-  {
-    year: 1991,
-    title: "Bağımsız Türk cumhuriyetleri",
-    period: "modern",
-    description: "Sovyetler Birliği'nin dağılmasıyla Orta Asya'daki Türk cumhuriyetleri bağımsızlıklarını ilan etti."
-  }
-];
-
-
-/* =========================================================
-   3. YARDIMCI FONKSİYONLAR
-   ========================================================= */
-
-const $ = selector => document.querySelector(selector);
-const $$ = selector => [...document.querySelectorAll(selector)];
-
-const formatYear = year => {
-  if (year < 0) return `MÖ ${Math.abs(year)}`;
-  return `MS ${year}`;
+const STORAGE = {
+  theme: "turkicworld-theme-v1",
+  game: "turkicworld-game-v1"
 };
 
-const getState = id => STATES.find(state => state.id === id);
-
-const periodNames = {
+const PERIODS = {
   ancient: "İlk Türk Devletleri",
-  medieval: "Türk-İslam Devletleri",
+  islamic: "Türk-İslam Devletleri",
   empire: "İmparatorluklar",
   modern: "Modern Türk Devletleri"
 };
 
+const SYMBOLS = {
+  ancient: "𐰜",
+  islamic: "✥",
+  empire: "♜",
+  modern: "★"
+};
+
+/* ---------------------------------------------------------
+   1. DEVLET ARŞİVİ
+   Tarihler yaklaşık tarihsel dönemleri ifade eder.
+   Sınırlar ve yönetim alanları dönemlere göre değişmiştir.
+   --------------------------------------------------------- */
+
+const STATES = [
+  {
+    id: "xiongnu",
+    name: "Asya Hun Devleti",
+    era: "ancient",
+    date: "MÖ 3. yüzyıl",
+    start: -220,
+    end: 216,
+    capital: "Ötüken çevresi",
+    founder: "Teoman",
+    ruler: "Mete Han",
+    symbol: "𐰴",
+    location: [430, 190],
+    description: "Orta Asya bozkırlarında güçlü bir siyasi birlik oluşturan Hun konfederasyonu. Mete Han döneminde askerî ve siyasi teşkilatlanmasıyla öne çıktı.",
+    facts: [
+      "Mete Han döneminde siyasi ve askerî güç büyük ölçüde arttı.",
+      "Bozkır devlet geleneğinin önemli örneklerinden biridir.",
+      "Çin ile uzun süreli siyasi ve diplomatik ilişkiler yürütüldü."
+    ],
+    leaders: ["Teoman", "Mete Han", "Ki-ok"],
+    allies: ["Hun boyları ve bağlı topluluklar"],
+    rivals: ["Han Hanedanı"]
+  },
+  {
+    id: "western-hun",
+    name: "Batı Hun Devleti",
+    era: "ancient",
+    date: "4–5. yüzyıl",
+    start: 370,
+    end: 469,
+    capital: "Avrupa bozkırları",
+    founder: "Balamir ile ilişkilendirilen kuruluş",
+    ruler: "Attila",
+    symbol: "𐰴",
+    location: [185, 190],
+    description: "Avrupa Hunlarının siyasi ve askerî gücünü temsil eden yapı. Attila döneminde Doğu ve Batı Roma ile ilişkilerinde etkili oldu.",
+    facts: [
+      "Attila döneminde Avrupa siyasetinde belirleyici bir güç hâline geldi.",
+      "Doğu ve Batı Roma ile antlaşmalar ve diplomatik görüşmeler yapıldı.",
+      "Avrupa kavimlerinin siyasi tarihini etkiledi."
+    ],
+    leaders: ["Balamir", "Uldız", "Rua", "Attila"],
+    allies: ["Döneme göre değişen Germen toplulukları"],
+    rivals: ["Doğu Roma", "Batı Roma"]
+  },
+  {
+    id: "gokturk",
+    name: "Göktürk Kağanlığı",
+    era: "ancient",
+    date: "552–744",
+    start: 552,
+    end: 744,
+    capital: "Ötüken",
+    founder: "Bumin Kağan",
+    ruler: "Mukan Kağan",
+    symbol: "𐰜",
+    location: [460, 155],
+    description: "Türk adını devlet adı olarak kullanan ilk siyasi teşkilat olarak kabul edilir. Orta Asya'da geniş bir siyasi hâkimiyet kurdu.",
+    facts: [
+      "Bumin Kağan 552 yılında kağanlığın kuruluşunda öncü oldu.",
+      "Orhun Yazıtları, Göktürk tarihinin en önemli yazılı kaynaklarındandır.",
+      "Doğu ve Batı kanatlarıyla geniş bir coğrafyada etkili oldu."
+    ],
+    leaders: ["Bumin Kağan", "Mukan Kağan", "İstemi Yabgu", "Bilge Kağan", "Kül Tigin"],
+    allies: ["Döneme göre bağlı Türk boyları"],
+    rivals: ["Sui Hanedanı", "Tang Hanedanı"]
+  },
+  {
+    id: "western-gokturk",
+    name: "Batı Göktürk Kağanlığı",
+    era: "ancient",
+    date: "6–7. yüzyıl",
+    start: 603,
+    end: 657,
+    capital: "Yedisu bölgesi",
+    founder: "Göktürklerin batı kanadı",
+    ruler: "Tong Yabgu Kağan",
+    symbol: "𐰜",
+    location: [350, 210],
+    description: "Göktürk siyasi mirasının batı kanadını temsil eder. İpek Yolu üzerindeki konumu nedeniyle diplomatik ve ticari ilişkilerde etkiliydi.",
+    facts: [
+      "İpek Yolu üzerindeki ticari bağlantılarda önemli rol oynadı.",
+      "Bizans ve Sasani dünyasıyla diplomatik temaslarda bulundu.",
+      "Yedisu ve çevresinde etkili oldu."
+    ],
+    leaders: ["Şipi Kağan", "Tong Yabgu Kağan"],
+    allies: ["Bizans ile dönemsel diplomatik temaslar"],
+    rivals: ["Tang Hanedanı", "Sasani Devleti"]
+  },
+  {
+    id: "uyghur",
+    name: "Uygur Kağanlığı",
+    era: "ancient",
+    date: "744–840",
+    start: 744,
+    end: 840,
+    capital: "Ordu Balık",
+    founder: "Kutluk Bilge Kül Kağan",
+    ruler: "Moyun Çor",
+    symbol: "𐰇",
+    location: [505, 235],
+    description: "Yerleşik şehir hayatı, yazılı kültür ve ticaret alanlarında gelişen önemli bir Türk kağanlığı.",
+    facts: [
+      "Ordu Balık önemli siyasi ve kültürel merkezlerinden biriydi.",
+      "Maniheizm ve Budizm gibi inançlar bazı dönemlerde etkili oldu.",
+      "Uygur yazısı ve kültürel üretim tarih açısından önemlidir."
+    ],
+    leaders: ["Kutluk Bilge Kül Kağan", "Moyun Çor", "Bögü Kağan"],
+    allies: ["Tang Hanedanı ile dönemsel ilişkiler"],
+    rivals: ["Kırgız Kağanlığı"]
+  },
+  {
+    id: "khazar",
+    name: "Hazar Kağanlığı",
+    era: "ancient",
+    date: "7–10. yüzyıl",
+    start: 650,
+    end: 969,
+    capital: "İtil",
+    founder: "Hazar siyasi birliğinin kurucuları",
+    ruler: "Bulmuş Kağan",
+    symbol: "✥",
+    location: [245, 260],
+    description: "Hazar Denizi'nin kuzeyi ve Kafkasya çevresinde etkili olan Türk siyasi oluşumu. Ticaret yolları ve diplomatik ilişkileriyle tanındı.",
+    facts: [
+      "İtil önemli siyasi ve ticari merkezlerinden biriydi.",
+      "Bizans ve çevre devletlerle diplomatik ilişkiler kuruldu.",
+      "Farklı inanç ve toplulukların bir arada bulunduğu bir yapıydı."
+    ],
+    leaders: ["Bulan", "Obadiah", "Joseph"],
+    allies: ["Bizans ile dönemsel ilişkiler"],
+    rivals: ["Kiev Knezliği", "Arap güçleri"]
+  },
+  {
+    id: "karakhanid",
+    name: "Karahanlı Devleti",
+    era: "islamic",
+    date: "840–1212",
+    start: 840,
+    end: 1212,
+    capital: "Balasagun, Kaşgar",
+    founder: "Bilinen ilk hükümdarlarından Bilge Kül Kadir Han",
+    ruler: "Satuk Buğra Han",
+    symbol: "✥",
+    location: [415, 250],
+    description: "Türk-İslam tarihinin önemli devletlerinden biri. Türk dili ve İslam kültürünün gelişmesinde önemli rol oynadı.",
+    facts: [
+      "Satuk Buğra Han'ın Müslüman olması devlet tarihi açısından önemli bir dönüm noktasıdır.",
+      "Kaşgarlı Mahmud ve Yusuf Has Hacib gibi isimler bu kültürel çevrede yetişti.",
+      "Türk dili ve edebiyatı açısından önemli eserler ortaya çıktı."
+    ],
+    leaders: ["Satuk Buğra Han", "Musa Baytaş", "Hasan Buğra Han"],
+    allies: ["Döneme göre diğer Türk-İslam hanedanları"],
+    rivals: ["Gazneliler", "Selçuklular"]
+  },
+  {
+    id: "ghaznavid",
+    name: "Gazneli Devleti",
+    era: "islamic",
+    date: "977–1186",
+    start: 977,
+    end: 1186,
+    capital: "Gazne",
+    founder: "Sebük Tegin",
+    ruler: "Gazneli Mahmud",
+    symbol: "✥",
+    location: [490, 330],
+    description: "Afganistan ve çevresinde kurulan, Hindistan'a uzanan siyasi ve kültürel etkisi bulunan Türk-İslam devleti.",
+    facts: [
+      "Gazneli Mahmud döneminde devletin siyasi etkisi genişledi.",
+      "Gazne önemli bir kültür ve yönetim merkezi oldu.",
+      "Farsça edebiyat ve saray kültürü gelişti."
+    ],
+    leaders: ["Sebük Tegin", "Gazneli Mahmud", "Mesud"],
+    allies: ["Döneme göre Karahanlılar"],
+    rivals: ["Büyük Selçuklu Devleti"]
+  },
+  {
+    id: "great-seljuk",
+    name: "Büyük Selçuklu Devleti",
+    era: "islamic",
+    date: "1037–1194",
+    start: 1037,
+    end: 1194,
+    capital: "Nişabur, Rey, İsfahan",
+    founder: "Tuğrul Bey",
+    ruler: "Melikşah",
+    symbol: "✥",
+    location: [430, 320],
+    description: "Orta Asya'dan İran ve Irak'a uzanan geniş bir coğrafyada etkili olan Türk-İslam imparatorluğu.",
+    facts: [
+      "1040 Dandanakan Savaşı devletin yükselişinde önemli rol oynadı.",
+      "Nizamiye medreseleri eğitim tarihinde önemli bir yere sahiptir.",
+      "Melikşah döneminde siyasi ve kültürel güç zirveye yaklaştı."
+    ],
+    leaders: ["Tuğrul Bey", "Alp Arslan", "Melikşah", "Sencer"],
+    allies: ["Döneme göre Abbasi Halifeliği"],
+    rivals: ["Gazneliler", "Bizans", "Karahanlılar"]
+  },
+  {
+    id: "anatolian-seljuk",
+    name: "Anadolu Selçuklu Devleti",
+    era: "islamic",
+    date: "1077–1308",
+    start: 1077,
+    end: 1308,
+    capital: "İznik, Konya",
+    founder: "Kutalmışoğlu Süleyman Şah",
+    ruler: "I. Alaeddin Keykubad",
+    symbol: "✥",
+    location: [315, 345],
+    description: "Anadolu'da Türk siyasi varlığının güçlenmesinde etkili olan Selçuklu devleti. Ticaret, mimari ve şehirleşme alanlarında iz bıraktı.",
+    facts: [
+      "Konya önemli bir siyasi ve kültürel merkez hâline geldi.",
+      "Kervansaraylar ticaret yollarının gelişmesini destekledi.",
+      "I. Alaeddin Keykubad döneminde devletin gücü arttı."
+    ],
+    leaders: ["Süleyman Şah", "I. Kılıç Arslan", "I. Alaeddin Keykubad"],
+    allies: ["Döneme göre çevre beylikler"],
+    rivals: ["Bizans", "Moğol İlhanlıları"]
+  },
+  {
+    id: "khwarazmian",
+    name: "Harzemşahlar",
+    era: "islamic",
+    date: "1077–1231",
+    start: 1077,
+    end: 1231,
+    capital: "Gürgenç",
+    founder: "Anuş Tigin",
+    ruler: "Alaeddin Tekiş",
+    symbol: "✥",
+    location: [470, 275],
+    description: "Harezm merkezli olarak gelişen ve Orta Asya ile İran coğrafyasında etkili olan Türk hanedanı.",
+    facts: [
+      "Alaeddin Tekiş döneminde siyasi güç arttı.",
+      "Moğol istilası devletin son döneminde belirleyici oldu.",
+      "Orta Asya ve İran tarihinin önemli siyasi aktörlerindendir."
+    ],
+    leaders: ["Anuş Tigin", "Atsız", "Alaeddin Tekiş", "Celaleddin Mengüberti"],
+    allies: ["Döneme göre yerel hanedanlar"],
+    rivals: ["Moğol İmparatorluğu"]
+  },
+  {
+    id: "golden-horde",
+    name: "Altın Orda Devleti",
+    era: "empire",
+    date: "13–15. yüzyıl",
+    start: 1242,
+    end: 1502,
+    capital: "Saray-Batu, Saray-Berke",
+    founder: "Batu Han",
+    ruler: "Özbek Han",
+    symbol: "♜",
+    location: [245, 220],
+    description: "Cuci Ulusu'nun devamı olarak gelişen, Avrasya bozkırlarında etkili olan Türk-Moğol siyasi yapısı.",
+    facts: [
+      "Özbek Han döneminde İslamiyetin etkisi güçlendi.",
+      "Rus knezlikleri ve Doğu Avrupa siyaseti üzerinde etkili oldu.",
+      "Kırım ve Kazan gibi sonraki hanlıkların tarihini etkiledi."
+    ],
+    leaders: ["Batu Han", "Berke Han", "Özbek Han", "Toktamış"],
+    allies: ["Döneme göre Memlük Devleti"],
+    rivals: ["Timur Devleti", "Rus knezlikleri"]
+  },
+  {
+    id: "timurid",
+    name: "Timur Devleti",
+    era: "empire",
+    date: "1370–1507",
+    start: 1370,
+    end: 1507,
+    capital: "Semerkant",
+    founder: "Timur",
+    ruler: "Timur",
+    symbol: "♜",
+    location: [445, 285],
+    description: "Maveraünnehir merkezli olarak kurulan ve Orta Asya, İran ve çevresinde etkili olan büyük siyasi güç.",
+    facts: [
+      "Semerkant önemli bir bilim, sanat ve mimari merkezi hâline geldi.",
+      "Uluğ Bey döneminde astronomi çalışmaları gelişti.",
+      "Timur dönemi Avrasya tarihini derinden etkiledi."
+    ],
+    leaders: ["Timur", "Şahruh", "Uluğ Bey", "Hüseyin Baykara"],
+    allies: ["Döneme göre çeşitli Orta Asya hanedanları"],
+    rivals: ["Altın Orda", "Osmanlı Devleti"]
+  },
+  {
+    id: "ottoman",
+    name: "Osmanlı Devleti",
+    era: "empire",
+    date: "1299–1922",
+    start: 1299,
+    end: 1922,
+    capital: "Bursa, Edirne, İstanbul",
+    founder: "Osman Gazi",
+    ruler: "Kanuni Sultan Süleyman",
+    symbol: "☪",
+    location: [285, 340],
+    description: "Anadolu'da kurularak üç kıtada yüzyıllar boyunca hüküm süren büyük imparatorluk. Devlet teşkilatı, mimari, hukuk ve kültür alanlarında kalıcı izler bıraktı.",
+    facts: [
+      "Osman Gazi döneminde beyliğin temelleri atıldı.",
+      "1453 yılında İstanbul'un fethi dünya tarihi açısından önemli bir dönüm noktası oldu.",
+      "Kanuni Sultan Süleyman döneminde siyasi ve kültürel etki genişledi.",
+      "Saltanat 1922 yılında kaldırıldı."
+    ],
+    leaders: ["Osman Gazi", "Orhan Gazi", "Fatih Sultan Mehmed", "Yavuz Sultan Selim", "Kanuni Sultan Süleyman"],
+    allies: ["Döneme göre Fransa ve çeşitli Avrupa devletleri"],
+    rivals: ["Safevî Devleti", "Habsburg Monarşisi"]
+  },
+  {
+    id: "aq-qoyunlu",
+    name: "Akkoyunlu Devleti",
+    era: "empire",
+    date: "14–16. yüzyıl",
+    start: 1378,
+    end: 1501,
+    capital: "Diyarbakır, Tebriz",
+    founder: "Kara Yülük Osman Bey",
+    ruler: "Uzun Hasan",
+    symbol: "♜",
+    location: [365, 320],
+    description: "Doğu Anadolu, Azerbaycan ve İran çevresinde etkili olan Türkmen hanedanı.",
+    facts: [
+      "Uzun Hasan döneminde siyasi güç ve diplomatik ilişkiler gelişti.",
+      "Osmanlı ve Venedik ile diplomatik temaslarda bulunuldu.",
+      "Dönemin Türkmen siyasi tarihinde önemli yer tuttu."
+    ],
+    leaders: ["Kara Yülük Osman", "Uzun Hasan", "Sultan Yakup"],
+    allies: ["Döneme göre Venedik"],
+    rivals: ["Karakoyunlular", "Osmanlı Devleti"]
+  },
+  {
+    id: "qara-qoyunlu",
+    name: "Karakoyunlu Devleti",
+    era: "empire",
+    date: "14–15. yüzyıl",
+    start: 1375,
+    end: 1468,
+    capital: "Tebriz",
+    founder: "Bayram Hoca",
+    ruler: "Kara Yusuf",
+    symbol: "♜",
+    location: [390, 295],
+    description: "Doğu Anadolu, Azerbaycan ve İran'ın batısında etkili olan Türkmen konfederasyonu.",
+    facts: [
+      "Kara Yusuf döneminde siyasi güç arttı.",
+      "Tebriz önemli bir yönetim merkezi oldu.",
+      "Akkoyunlularla uzun süreli siyasi rekabet yaşandı."
+    ],
+    leaders: ["Bayram Hoca", "Kara Yusuf", "Cihan Şah"],
+    allies: ["Döneme göre yerel Türkmen beyleri"],
+    rivals: ["Akkoyunlular", "Timur Devleti"]
+  },
+  {
+    id: "crimean-khanate",
+    name: "Kırım Hanlığı",
+    era: "empire",
+    date: "1441–1783",
+    start: 1441,
+    end: 1783,
+    capital: "Bahçesaray",
+    founder: "Hacı I. Giray",
+    ruler: "Mengli Giray",
+    symbol: "♜",
+    location: [220, 260],
+    description: "Kırım yarımadası ve çevresinde kurulan, Karadeniz siyasetinde etkili olan Türk hanlığı.",
+    facts: [
+      "Bahçesaray önemli kültürel ve siyasi merkez oldu.",
+      "Osmanlı Devleti ile uzun süreli siyasi ilişkiler yürütüldü.",
+      "1783 yılında Rusya tarafından ilhak edildi."
+    ],
+    leaders: ["Hacı I. Giray", "Mengli Giray", "Devlet Giray"],
+    allies: ["Osmanlı Devleti"],
+    rivals: ["Rusya Çarlığı", "Polonya-Litvanya"]
+  },
+  {
+    id: "safavid",
+    name: "Safevî Devleti",
+    era: "empire",
+    date: "1501–1736",
+    start: 1501,
+    end: 1736,
+    capital: "Tebriz, Kazvin, İsfahan",
+    founder: "Şah İsmail",
+    ruler: "Şah Abbas",
+    symbol: "♜",
+    location: [410, 350],
+    description: "Azerbaycan ve İran coğrafyasında kurulan, hanedan kökeni ve siyasi kültürü bakımından Türk tarihiyle yakından ilişkili devlet.",
+    facts: [
+      "Şah İsmail 1501 yılında Tebriz'de hükümdarlığını ilan etti.",
+      "Safevî hanedanı Azerbaycan Türkçesi ve Türkçe kültür çevresiyle ilişkilidir.",
+      "Osmanlı-Safevî ilişkileri bölge tarihini önemli ölçüde etkiledi."
+    ],
+    leaders: ["Şah İsmail", "Şah Tahmasb", "Şah Abbas"],
+    allies: ["Döneme göre Avrupa devletleriyle temaslar"],
+    rivals: ["Osmanlı Devleti", "Özbek Hanlığı"]
+  },
+  {
+    id: "kazakh-khanate",
+    name: "Kazak Hanlığı",
+    era: "empire",
+    date: "15–19. yüzyıl",
+    start: 1465,
+    end: 1847,
+    capital: "Sığnak ve farklı merkezler",
+    founder: "Kerey Han ve Canibek Han",
+    ruler: "Ablay Han",
+    symbol: "♜",
+    location: [525, 185],
+    description: "Kazak bozkırlarında gelişen ve Kazak siyasi kimliğinin oluşumunda önemli rol oynayan hanlık.",
+    facts: [
+      "Kerey ve Canibek hanlar kuruluş sürecinde öne çıktı.",
+      "Kazak cüzleri siyasi ve toplumsal yapının önemli unsurlarıydı.",
+      "Ablay Han dönemi siyasi ilişkiler açısından dikkat çekicidir."
+    ],
+    leaders: ["Kerey Han", "Canibek Han", "Ablay Han"],
+    allies: ["Döneme göre komşu bozkır toplulukları"],
+    rivals: ["Cungar Hanlığı", "Rus İmparatorluğu"]
+  },
+  {
+    id: "uzbek-khanate",
+    name: "Buhara Hanlığı",
+    era: "empire",
+    date: "16–18. yüzyıl",
+    start: 1500,
+    end: 1785,
+    capital: "Buhara",
+    founder: "Muhammed Şeybani Han",
+    ruler: "Abdullah Han II",
+    symbol: "♜",
+    location: [465, 300],
+    description: "Maveraünnehir'de gelişen Özbek hanedanı ve devlet geleneğinin önemli temsilcilerinden.",
+    facts: [
+      "Buhara önemli bir bilim ve kültür merkeziydi.",
+      "Şeybanî hanedanı bölge siyasetinde etkili oldu.",
+      "Medrese ve mimari eserleriyle tanındı."
+    ],
+    leaders: ["Muhammed Şeybani Han", "Abdullah Han II"],
+    allies: ["Döneme göre bölgesel hanlıklar"],
+    rivals: ["Safevî Devleti"]
+  },
+  {
+    id: "mughal",
+    name: "Babür İmparatorluğu",
+    era: "empire",
+    date: "1526–1857",
+    start: 1526,
+    end: 1857,
+    capital: "Delhi, Agra",
+    founder: "Babür",
+    ruler: "Ekber Şah",
+    symbol: "♜",
+    location: [565, 370],
+    description: "Timurlu hanedan geleneğinden gelen Babür tarafından Hindistan'da kurulan büyük imparatorluk. Türk-Moğol ve Fars kültür çevrelerinin etkileşimini yansıtır.",
+    facts: [
+      "Babür, Timur ve Cengiz Han soy gelenekleriyle ilişkilidir.",
+      "Ekber Şah döneminde yönetim ve kültür alanında önemli gelişmeler yaşandı.",
+      "Babür mimarisi Güney Asya kültür tarihinde önemli bir yere sahiptir."
+    ],
+    leaders: ["Babür", "Hümayun", "Ekber Şah", "Şah Cihan", "Evrengzib"],
+    allies: ["Döneme göre bölgesel hanedanlar"],
+    rivals: ["Delhi Sultanlığı'nın ardıl güçleri", "Maratha konfederasyonu"]
+  },
+  {
+    id: "turkey",
+    name: "Türkiye Cumhuriyeti",
+    era: "modern",
+    date: "1923–Günümüz",
+    start: 1923,
+    end: 9999,
+    capital: "Ankara",
+    founder: "Mustafa Kemal Atatürk",
+    ruler: "Cumhurbaşkanlığı makamı",
+    symbol: "★",
+    location: [300, 365],
+    description: "29 Ekim 1923 tarihinde ilan edilen Türkiye Cumhuriyeti, Millî Mücadele'nin ardından egemenliğin millete ait olduğu yeni devlet düzenini kurdu.",
+    facts: [
+      "29 Ekim 1923 tarihinde Cumhuriyet ilan edildi.",
+      "Mustafa Kemal Atatürk, Cumhuriyet'in ilk cumhurbaşkanı oldu.",
+      "Ankara başkent olarak belirlendi.",
+      "Cumhuriyet döneminde hukuk, eğitim, yönetim ve toplumsal yaşam alanlarında köklü değişiklikler gerçekleştirildi."
+    ],
+    leaders: ["Mustafa Kemal Atatürk", "İsmet İnönü", "Celal Bayar"],
+    allies: ["Döneme ve uluslararası anlaşmalara göre değişen ülkeler"],
+    rivals: ["Dış ilişkiler dönemlere göre değişir"]
+  },
+  {
+    id: "azerbaijan",
+    name: "Azerbaycan Cumhuriyeti",
+    era: "modern",
+    date: "1918 / 1991–Günümüz",
+    start: 1991,
+    end: 9999,
+    capital: "Bakü",
+    founder: "Modern bağımsızlık süreci",
+    ruler: "Cumhurbaşkanlığı makamı",
+    symbol: "★",
+    location: [355, 300],
+    description: "Azerbaycan, 1918 yılında kısa ömürlü ilk cumhuriyet deneyiminin ardından 1991 yılında yeniden bağımsızlığını ilan etti.",
+    facts: [
+      "Azerbaycan Demokratik Cumhuriyeti 1918 yılında kuruldu.",
+      "Azerbaycan 1991 yılında bağımsızlığını yeniden ilan etti.",
+      "Bakü, ülkenin başkenti ve önemli kültür merkezidir."
+    ],
+    leaders: ["Mehmed Emin Resulzade", "Haydar Aliyev"],
+    allies: ["Türkiye ile yakın ilişkiler"],
+    rivals: ["Bölgesel ilişkiler dönemlere göre değişir"]
+  },
+  {
+    id: "kazakhstan",
+    name: "Kazakistan Cumhuriyeti",
+    era: "modern",
+    date: "1991–Günümüz",
+    start: 1991,
+    end: 9999,
+    capital: "Astana",
+    founder: "Bağımsızlık süreci",
+    ruler: "Cumhurbaşkanlığı makamı",
+    symbol: "★",
+    location: [535, 205],
+    description: "Orta Asya'da yer alan bağımsız Türk cumhuriyeti. Geniş yüzölçümü, doğal kaynakları ve bozkır kültürüyle öne çıkar.",
+    facts: [
+      "16 Aralık 1991 tarihinde bağımsızlığını ilan etti.",
+      "Astana ülkenin başkentidir.",
+      "Kazakistan Türk Devletleri Teşkilatı üyesidir."
+    ],
+    leaders: ["Nursultan Nazarbayev", "Kassym-Jomart Tokayev"],
+    allies: ["Türk devletleriyle çok taraflı ilişkiler"],
+    rivals: ["Dış ilişkiler dönemlere göre değişir"]
+  },
+  {
+    id: "uzbekistan",
+    name: "Özbekistan Cumhuriyeti",
+    era: "modern",
+    date: "1991–Günümüz",
+    start: 1991,
+    end: 9999,
+    capital: "Taşkent",
+    founder: "Bağımsızlık süreci",
+    ruler: "Cumhurbaşkanlığı makamı",
+    symbol: "★",
+    location: [475, 280],
+    description: "Maveraünnehir'in tarihî şehirlerini barındıran bağımsız Orta Asya Türk cumhuriyeti.",
+    facts: [
+      "1 Eylül 1991 tarihinde bağımsızlığını ilan etti.",
+      "Semerkant, Buhara ve Hive önemli tarihî şehirleridir.",
+      "Taşkent günümüzde başkenttir."
+    ],
+    leaders: ["İslam Kerimov", "Şevket Mirziyoyev"],
+    allies: ["Türk devletleriyle çok taraflı ilişkiler"],
+    rivals: ["Dış ilişkiler dönemlere göre değişir"]
+  },
+  {
+    id: "kyrgyzstan",
+    name: "Kırgızistan Cumhuriyeti",
+    era: "modern",
+    date: "1991–Günümüz",
+    start: 1991,
+    end: 9999,
+    capital: "Bişkek",
+    founder: "Bağımsızlık süreci",
+    ruler: "Cumhurbaşkanlığı makamı",
+    symbol: "★",
+    location: [510, 250],
+    description: "Tanrı Dağları çevresinde yer alan, köklü göçebe kültürü ve Manas Destanı ile tanınan bağımsız Türk cumhuriyeti.",
+    facts: [
+      "31 Ağustos 1991 tarihinde bağımsızlığını ilan etti.",
+      "Manas Destanı Kırgız kültürünün önemli miraslarındandır.",
+      "Bişkek ülkenin başkentidir."
+    ],
+    leaders: ["Askar Akayev", "Sadyr Japarov"],
+    allies: ["Türk devletleriyle çok taraflı ilişkiler"],
+    rivals: ["Dış ilişkiler dönemlere göre değişir"]
+  },
+  {
+    id: "turkmenistan",
+    name: "Türkmenistan",
+    era: "modern",
+    date: "1991–Günümüz",
+    start: 1991,
+    end: 9999,
+    capital: "Aşkabat",
+    founder: "Bağımsızlık süreci",
+    ruler: "Cumhurbaşkanlığı makamı",
+    symbol: "★",
+    location: [430, 330],
+    description: "Orta Asya'da bulunan bağımsız Türk devleti. Türkmen kültürü, halıcılık geleneği ve doğal gaz kaynaklarıyla tanınır.",
+    facts: [
+      "27 Ekim 1991 tarihinde bağımsızlığını ilan etti.",
+      "Aşkabat ülkenin başkentidir.",
+      "Türkmenistan daimi tarafsızlık statüsüne sahiptir."
+    ],
+    leaders: ["Saparmurat Niyazov", "Gurbanguly Berdimuhamedov", "Serdar Berdimuhamedov"],
+    allies: ["Türk devletleriyle çok taraflı ilişkiler"],
+    rivals: ["Dış ilişkiler dönemlere göre değişir"]
+  }
+];
+
+/* ---------------------------------------------------------
+   2. ZAMAN ÇİZELGESİ
+   --------------------------------------------------------- */
+
+const EVENTS = [
+  { year: "MÖ 220", era: "ancient", title: "Asya Hun siyasi birliğinin yükselişi", description: "Teoman ve ardından Mete Han dönemlerinde Orta Asya'da güçlü bir siyasi yapı gelişti." },
+  { year: "552", era: "ancient", title: "Göktürk Kağanlığı'nın kuruluşu", description: "Bumin Kağan öncülüğünde Göktürk siyasi teşkilatı kuruldu." },
+  { year: "603", era: "ancient", title: "Göktürk siyasi yapısında ayrışma", description: "Doğu ve Batı kanatları arasındaki siyasi ayrışma belirginleşti." },
+  { year: "682", era: "ancient", title: "II. Göktürk Kağanlığı", description: "Kutluk Kağan öncülüğünde Göktürk siyasi varlığı yeniden kuruldu." },
+  { year: "744", era: "ancient", title: "Uygur Kağanlığı'nın kuruluşu", description: "Uygurlar Orta Asya'da yeni bir kağanlık kurdu." },
+  { year: "840", era: "islamic", title: "Uygur Kağanlığı'nın dağılması", description: "Uygur toplulukları farklı bölgelere yayılarak yeni siyasi ve kültürel merkezler oluşturdu." },
+  { year: "10. yüzyıl", era: "islamic", title: "Karahanlılarda İslamiyet", description: "Karahanlı hanedanında İslamiyetin kabulü Türk-İslam tarihi açısından önemli bir dönüm noktası oldu." },
+  { year: "1040", era: "islamic", title: "Dandanakan Savaşı", description: "Selçukluların Gazneliler karşısındaki başarısı Büyük Selçuklu Devleti'nin yükselişini hızlandırdı." },
+  { year: "1071", era: "islamic", title: "Malazgirt Savaşı", description: "Alp Arslan'ın Bizans karşısındaki zaferi Anadolu tarihinin seyrini etkiledi." },
+  { year: "1077", era: "islamic", title: "Anadolu Selçuklu Devleti", description: "Anadolu'da Selçuklu siyasi teşkilatı gelişti." },
+  { year: "1231", era: "islamic", title: "Harzemşahların sona erişi", description: "Moğol istilaları sonrasında Harzemşah siyasi varlığı sona erdi." },
+  { year: "1299", era: "empire", title: "Osmanlı Beyliği'nin kuruluş dönemi", description: "Osman Gazi öncülüğünde Osmanlı siyasi teşkilatının temelleri atıldı." },
+  { year: "1453", era: "empire", title: "İstanbul'un fethi", description: "Fatih Sultan Mehmed'in İstanbul'u fethetmesi dünya tarihi açısından önemli sonuçlar doğurdu." },
+  { year: "1501", era: "empire", title: "Safevî Devleti'nin kuruluşu", description: "Şah İsmail Tebriz'de hükümdarlığını ilan etti." },
+  { year: "1517", era: "empire", title: "Osmanlı'nın Memlük topraklarına hâkimiyeti", description: "Yavuz Sultan Selim döneminde Osmanlı Devleti'nin Orta Doğu'daki etkisi genişledi." },
+  { year: "1526", era: "empire", title: "Babür İmparatorluğu'nun kuruluşu", description: "Babür, Hindistan'da yeni bir imparatorluk kurdu." },
+  { year: "1683", era: "empire", title: "II. Viyana Kuşatması", description: "Osmanlı ve Avrupa tarihinin önemli dönüm noktalarından biri yaşandı." },
+  { year: "1783", era: "empire", title: "Kırım'ın Rusya tarafından ilhakı", description: "Kırım Hanlığı'nın bağımsız siyasi varlığı sona erdi." },
+  { year: "1918", era: "modern", title: "Azerbaycan Demokratik Cumhuriyeti", description: "Azerbaycan'da cumhuriyet yönetimi ilan edildi." },
+  { year: "1922", era: "modern", title: "Saltanatın kaldırılması", description: "Osmanlı saltanatı kaldırıldı." },
+  { year: "1923", era: "modern", title: "Türkiye Cumhuriyeti'nin ilanı", description: "29 Ekim 1923 tarihinde Cumhuriyet ilan edildi ve Mustafa Kemal Atatürk ilk cumhurbaşkanı oldu." },
+  { year: "1991", era: "modern", title: "Orta Asya Türk cumhuriyetlerinin bağımsızlığı", description: "Kazakistan, Kırgızistan, Özbekistan ve Türkmenistan bağımsızlıklarını ilan etti. Azerbaycan da bağımsızlığını yeniden kazandı." },
+  { year: "2009", era: "modern", title: "Nahçıvan Anlaşması", description: "Türk Konseyi'nin kuruluşuna temel oluşturan anlaşma imzalandı." },
+  { year: "2021", era: "modern", title: "Türk Devletleri Teşkilatı", description: "Türk Konseyi, Türk Devletleri Teşkilatı adını aldı." }
+];
+
+/* ---------------------------------------------------------
+   3. GENEL YARDIMCILAR
+   --------------------------------------------------------- */
+
 function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, character => ({
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
-    "'": "&#039;"
-  })[character]);
+    "'": "&#39;"
+  })[char]);
 }
 
-function showToast(message) {
-  const container = $("#toast-container");
+function formatNumber(number) {
+  return new Intl.NumberFormat("tr-TR").format(Math.round(number));
+}
+
+function getState(id) {
+  return STATES.find(state => state.id === id);
+}
+
+function toast(message, type = "success") {
+  const container = $("#toastContainer");
   if (!container) return;
 
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.textContent = message;
+  const element = document.createElement("div");
+  element.className = `toast ${type === "error" ? "error" : ""}`;
+  element.textContent = message;
+  container.appendChild(element);
 
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 3500);
+  window.setTimeout(() => {
+    element.style.opacity = "0";
+    element.style.transform = "translateY(8px)";
+    window.setTimeout(() => element.remove(), 250);
+  }, 3000);
 }
 
-
-/* =========================================================
-   4. SAYFA GEÇİŞLERİ
-   ========================================================= */
-
-function navigateTo(pageName) {
-  const page = document.getElementById(`page-${pageName}`);
-
-  if (!page) return;
-
-  $$(".page").forEach(item => item.classList.remove("active"));
-  page.classList.add("active");
-
-  $$(".nav-link").forEach(button => {
-    button.classList.toggle(
-      "active",
-      button.dataset.page === pageName
-    );
-  });
-
-  $("#mobile-navigation")?.classList.remove("open");
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+function formatHistoricalYear(year) {
+  if (year < 0) return `MÖ ${Math.abs(year)}`;
+  if (year === 0) return "Tarih belirtilmemiş";
+  return `MS ${year}`;
 }
 
-document.addEventListener("click", event => {
-  const button = event.target.closest("[data-page]");
+/* ---------------------------------------------------------
+   4. ÖNE ÇIKAN DEVLETLER
+   --------------------------------------------------------- */
 
-  if (!button) return;
+function renderFeatured() {
+  const grid = $("#featuredGrid");
+  if (!grid) return;
 
-  navigateTo(button.dataset.page);
-});
+  const featuredIds = ["xiongnu", "gokturk", "great-seljuk", "ottoman", "turkey"];
 
+  grid.innerHTML = featuredIds.map(id => {
+    const state = getState(id);
+    if (!state) return "";
 
-/* =========================================================
-   5. MOBİL MENÜ
-   ========================================================= */
-
-$("#menu-toggle")?.addEventListener("click", () => {
-  $("#mobile-navigation")?.classList.toggle("open");
-});
-
-
-/* =========================================================
-   6. ANA SAYFA
-   ========================================================= */
-
-function initializeHome() {
-  $("#stat-states").textContent = STATES.length;
-
-  const featuredContainer = $("#featured-states");
-
-  if (!featuredContainer) return;
-
-  const featured = [
-    "asya-hun",
-    "gokturk",
-    "buyuk-selcuklu",
-    "osmanli",
-    "turkiye"
-  ];
-
-  featuredContainer.querySelectorAll("[data-state]").forEach(button => {
-    button.addEventListener("click", () => {
-      openStateDetail(button.dataset.state);
-    });
-  });
-
-  $$(".era-card").forEach(card => {
-    card.addEventListener("click", () => {
-      const era = card.dataset.era;
-
-      navigateTo("states");
-      renderStates(era);
-    });
-  });
+    return `
+      <article class="featured-card" data-symbol="${escapeHTML(state.symbol)}"
+        data-open-state="${escapeHTML(state.id)}" tabindex="0" role="button"
+        aria-label="${escapeHTML(state.name)} devletini incele">
+        <span class="featured-date">${escapeHTML(state.date)}</span>
+        <h3>${escapeHTML(state.name)}</h3>
+        <p>${escapeHTML(state.description.slice(0, 105))}...</p>
+        <span class="featured-open">DEVLETİ İNCELE ↗</span>
+      </article>
+    `;
+  }).join("");
 }
 
+/* ---------------------------------------------------------
+   5. DEVLET ARŞİVİ VE FİLTRELER
+   --------------------------------------------------------- */
 
-/* =========================================================
-   7. DEVLET LİSTESİ VE FİLTRELER
-   ========================================================= */
+let activeStateFilter = "all";
 
-let currentPeriodFilter = "all";
+function renderStates() {
+  const grid = $("#statesGrid");
+  const empty = $("#emptyState");
+  if (!grid) return;
 
-function renderStates(filter = currentPeriodFilter, search = "") {
-  currentPeriodFilter = filter;
+  const query = ($("#stateSearch")?.value || "").trim().toLocaleLowerCase("tr-TR");
+  const sort = $("#stateSort")?.value || "chronological";
 
-  const container = $("#states-grid");
-  if (!container) return;
-
-  const normalizedSearch = search.toLocaleLowerCase("tr");
-
-  const filtered = STATES.filter(state => {
-    const periodMatch =
-      filter === "all" || state.period === filter;
-
+  let results = STATES.filter(state => {
+    const matchesFilter = activeStateFilter === "all" || state.era === activeStateFilter;
     const searchable = [
       state.name,
+      state.date,
+      state.capital,
       state.founder,
-      state.famous,
-      state.region,
-      state.capital
-    ].join(" ").toLocaleLowerCase("tr");
+      state.ruler,
+      state.description,
+      ...state.leaders
+    ].join(" ").toLocaleLowerCase("tr-TR");
 
-    return periodMatch && searchable.includes(normalizedSearch);
+    return matchesFilter && searchable.includes(query);
   });
 
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="no-results">
-        <h3>Devlet bulunamadı</h3>
-        <p>Arama kelimesini veya dönem filtresini değiştir.</p>
+  results.sort((a, b) => {
+    if (sort === "name") return a.name.localeCompare(b.name, "tr");
+    return a.start - b.start;
+  });
+
+  $("#archiveCount").textContent = results.length;
+  $("#stateCount").textContent = STATES.length;
+
+  grid.innerHTML = results.map(state => `
+    <article class="state-card" data-open-state="${escapeHTML(state.id)}"
+      tabindex="0" role="button" aria-label="${escapeHTML(state.name)} detaylarını aç">
+      <div class="state-card-top">
+        <span class="state-card-period">${escapeHTML(PERIODS[state.era])}</span>
+        <span class="state-card-symbol">${escapeHTML(state.symbol)}</span>
       </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = filtered.map(state => `
-    <article class="state-card" data-state-card="${state.id}">
-      <div class="state-card-banner" style="background:
-        linear-gradient(135deg, ${state.color}55, #111923)">
-        <span>${escapeHTML(state.symbol)}</span>
-        <small class="state-card-period">
-          ${escapeHTML(periodNames[state.period])}
-        </small>
-      </div>
-
-      <div class="state-card-content">
-        <h3>${escapeHTML(state.name)}</h3>
-        <p>${escapeHTML(state.description)}</p>
-
-        <div class="state-card-meta">
-          <span>${escapeHTML(state.date)}</span>
-          <span>İNCELE →</span>
-        </div>
+      <h3>${escapeHTML(state.name)}</h3>
+      <p>${escapeHTML(state.description)}</p>
+      <div class="state-card-bottom">
+        <span>${escapeHTML(state.date)}</span>
+        <strong>İNCELE ↗</strong>
       </div>
     </article>
   `).join("");
 
-  container.querySelectorAll("[data-state-card]").forEach(card => {
-    card.addEventListener("click", () => {
-      openStateDetail(card.dataset.stateCard);
-    });
-  });
+  empty.hidden = results.length !== 0;
 }
 
-$("#state-search")?.addEventListener("input", event => {
-  renderStates(currentPeriodFilter, event.target.value);
-});
+function setupStateFilters() {
+  $("#stateFilters")?.addEventListener("click", event => {
+    const button = event.target.closest("[data-filter]");
+    if (!button) return;
 
-$("#state-period-filter")?.addEventListener("change", event => {
-  renderStates(event.target.value, $("#state-search").value);
-});
-
-$$(".filter-button").forEach(button => {
-  button.addEventListener("click", () => {
-    $$(".filter-button").forEach(item => {
-      item.classList.remove("active");
-    });
-
-    button.classList.add("active");
-
-    $("#state-period-filter").value = button.dataset.filter;
-
-    renderStates(
-      button.dataset.filter,
-      $("#state-search").value
-    );
+    activeStateFilter = button.dataset.filter;
+    $$(".filter-tab").forEach(tab => tab.classList.toggle("active", tab === button));
+    renderStates();
   });
-});
 
+  $("#stateSearch")?.addEventListener("input", renderStates);
+  $("#stateSort")?.addEventListener("change", renderStates);
+}
 
-/* =========================================================
-   8. DEVLET DETAY SAYFASI
-   ========================================================= */
+/* ---------------------------------------------------------
+   6. DEVLET DETAY PENCERESİ
+   --------------------------------------------------------- */
 
-function openStateDetail(id) {
+function openStateDetails(id) {
   const state = getState(id);
+  const dialog = $("#stateDialog");
+  const content = $("#dialogContent");
 
-  if (!state) return;
+  if (!state || !dialog || !content) return;
 
-  const container = $("#state-detail-content");
+  content.innerHTML = `
+    <div class="dialog-content">
+      <span class="dialog-kicker">${escapeHTML(PERIODS[state.era])}</span>
+      <h2>${escapeHTML(state.name)}</h2>
+      <p class="dialog-description">${escapeHTML(state.description)}</p>
 
-  container.innerHTML = `
-    <div class="state-detail-hero">
-      <div>
-        <span class="section-kicker">
-          ${escapeHTML(periodNames[state.period])}
-        </span>
-
-        <h1>${escapeHTML(state.name)}</h1>
-
-        <p>${escapeHTML(state.date)} • ${escapeHTML(state.region)}</p>
+      <div class="dialog-facts">
+        <div class="dialog-fact"><span>TARİH</span><strong>${escapeHTML(state.date)}</strong></div>
+        <div class="dialog-fact"><span>BAŞKENT / MERKEZ</span><strong>${escapeHTML(state.capital)}</strong></div>
+        <div class="dialog-fact"><span>KURULUŞ / ÖNCÜ İSİM</span><strong>${escapeHTML(state.founder)}</strong></div>
+        <div class="dialog-fact"><span>ÖNE ÇIKAN HÜKÜMDAR</span><strong>${escapeHTML(state.ruler)}</strong></div>
       </div>
 
-      <div class="state-detail-emblem">
-        ${escapeHTML(state.symbol)}
-      </div>
-    </div>
+      <h3 class="dialog-subtitle">Tarihî notlar</h3>
+      <ul>${state.facts.map(fact => `<li>${escapeHTML(fact)}</li>`).join("")}</ul>
 
-    <div class="state-detail-body">
+      <h3 class="dialog-subtitle">Önemli isimler</h3>
+      <ul>${state.leaders.map(name => `<li>${escapeHTML(name)}</li>`).join("")}</ul>
 
-      <div class="detail-facts">
-        <div class="detail-fact">
-          <small>Kurucu</small>
-          <strong>${escapeHTML(state.founder)}</strong>
-        </div>
+      <h3 class="dialog-subtitle">Diplomatik çevre</h3>
+      <p class="dialog-description"><strong>İlişkiler:</strong> ${escapeHTML(state.allies.join(", "))}</p>
+      <p class="dialog-description"><strong>Rekabet ve mücadeleler:</strong> ${escapeHTML(state.rivals.join(", "))}</p>
 
-        <div class="detail-fact">
-          <small>Önemli hükümdar</small>
-          <strong>${escapeHTML(state.famous)}</strong>
-        </div>
-
-        <div class="detail-fact">
-          <small>Başkent</small>
-          <strong>${escapeHTML(state.capital)}</strong>
-        </div>
-      </div>
-
-      <section class="detail-section">
-        <h3>Devlet Hakkında</h3>
-        <p>${escapeHTML(state.description)}</p>
-      </section>
-
-      <section class="detail-section">
-        <h3>Tarihî Bilgiler</h3>
-        <p>${escapeHTML(state.history)}</p>
-      </section>
-
-      <section class="detail-section">
-        <h3>Devlet Yapısı</h3>
-        <p>
-          <strong>Yönetim:</strong>
-          ${escapeHTML(state.government)}
-        </p>
-        <br>
-        <p>
-          <strong>Ekonomi:</strong>
-          ${escapeHTML(state.economy)}
-        </p>
-        <br>
-        <p>
-          <strong>Komşular:</strong>
-          ${escapeHTML(state.neighbors)}
-        </p>
-      </section>
-
-      <button class="primary-button" id="play-this-state">
-        BU DEVLETİ YÖNET →
-      </button>
-
+      <p class="game-note">Tarihî bilgiler genel bir özet niteliğindedir. Başlangıç ve bitiş tarihleri bazı devletler için yaklaşık dönemleri ifade eder.</p>
     </div>
   `;
 
-  navigateTo("state-detail");
+  if (!dialog.open) dialog.showModal();
+}
 
-  $("#play-this-state").addEventListener("click", () => {
-    navigateTo("game");
-    startGame(state.id);
+function setupStateDetails() {
+  document.addEventListener("click", event => {
+    const target = event.target.closest("[data-open-state]");
+    if (!target) return;
+    openStateDetails(target.dataset.openState);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const target = event.target.closest("[data-open-state]");
+    if (!target || target.tagName === "BUTTON") return;
+    event.preventDefault();
+    openStateDetails(target.dataset.openState);
+  });
+
+  $("#closeDialogButton")?.addEventListener("click", () => $("#stateDialog")?.close());
+
+  $("#stateDialog")?.addEventListener("click", event => {
+    if (event.target === $("#stateDialog")) $("#stateDialog").close();
   });
 }
 
+/* ---------------------------------------------------------
+   7. ŞEMATİK ATLAS HARİTASI
+   --------------------------------------------------------- */
 
-/* =========================================================
-   9. ZAMAN ÇİZELGESİ
-   ========================================================= */
+let selectedMapState = null;
 
-function renderTimeline(filter = "all") {
-  const container = $("#timeline-container");
-  if (!container) return;
+function renderMap() {
+  const markers = $("#mapMarkers");
+  const period = $("#mapPeriod")?.value || "all";
+  if (!markers) return;
 
-  const filtered = EVENTS.filter(event =>
-    filter === "all" || event.period === filter
+  const visibleStates = STATES.filter(state => period === "all" || state.era === period);
+
+  markers.innerHTML = visibleStates.map(state => {
+    const [x, y] = state.location;
+
+    return `
+      <g class="map-marker ${selectedMapState === state.id ? "selected" : ""}"
+        data-map-state="${escapeHTML(state.id)}" tabindex="0" role="button"
+        aria-label="${escapeHTML(state.name)}">
+        <circle class="marker-halo" cx="${x}" cy="${y}" r="15"></circle>
+        <circle class="marker-dot" cx="${x}" cy="${y}" r="6"></circle>
+        <text x="${x + 12}" y="${y - 10}">${escapeHTML(state.name)}</text>
+      </g>
+    `;
+  }).join("");
+
+  const labels = {
+    all: "BÜTÜN DÖNEMLER",
+    ancient: "İLK TÜRK DEVLETLERİ",
+    islamic: "TÜRK-İSLAM DEVLETLERİ",
+    empire: "İMPARATORLUKLAR",
+    modern: "MODERN TÜRK DEVLETLERİ"
+  };
+
+  $("#mapPeriodLabel").textContent = labels[period];
+  $("#mapResultCount").textContent = `${visibleStates.length} devlet işareti gösteriliyor`;
+
+  if (selectedMapState && !visibleStates.some(state => state.id === selectedMapState)) {
+    selectedMapState = null;
+    showMapPlaceholder();
+  }
+}
+
+function showMapPlaceholder() {
+  const placeholder = $(".info-placeholder");
+  const selected = $("#mapSelectedInfo");
+  if (placeholder) placeholder.hidden = false;
+  if (selected) selected.hidden = true;
+}
+
+function selectMapState(id) {
+  const state = getState(id);
+  if (!state) return;
+
+  selectedMapState = id;
+  renderMap();
+
+  const placeholder = $(".info-placeholder");
+  const selected = $("#mapSelectedInfo");
+  if (!selected) return;
+
+  if (placeholder) placeholder.hidden = true;
+  selected.hidden = false;
+
+  selected.innerHTML = `
+    <span class="selected-era">${escapeHTML(PERIODS[state.era])}</span>
+    <h3>${escapeHTML(state.name)}</h3>
+    <p>${escapeHTML(state.description)}</p>
+    <div class="map-facts">
+      <div class="map-fact"><span>Dönem</span><strong>${escapeHTML(state.date)}</strong></div>
+      <div class="map-fact"><span>Merkez</span><strong>${escapeHTML(state.capital)}</strong></div>
+      <div class="map-fact"><span>Öne çıkan isim</span><strong>${escapeHTML(state.ruler)}</strong></div>
+    </div>
+    <button class="button button-primary" style="width:100%;margin-top:20px" id="mapDetailsButton">Ayrıntıları görüntüle →</button>
+  `;
+
+  $("#mapDetailsButton")?.addEventListener("click", () => openStateDetails(id));
+}
+
+function setupMap() {
+  $("#mapPeriod")?.addEventListener("change", renderMap);
+
+  $("#mapMarkers")?.addEventListener("click", event => {
+    const marker = event.target.closest("[data-map-state]");
+    if (marker) selectMapState(marker.dataset.mapState);
+  });
+
+  $("#mapMarkers")?.addEventListener("keydown", event => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const marker = event.target.closest("[data-map-state]");
+    if (!marker) return;
+    event.preventDefault();
+    selectMapState(marker.dataset.mapState);
+  });
+
+  $("#resetMapButton")?.addEventListener("click", () => {
+    $("#mapPeriod").value = "all";
+    selectedMapState = null;
+    renderMap();
+    showMapPlaceholder();
+  });
+
+  renderMap();
+}
+
+/* ---------------------------------------------------------
+   8. ZAMAN ÇİZELGESİ
+   --------------------------------------------------------- */
+
+let activeTimelineFilter = "all";
+
+function renderTimeline() {
+  const list = $("#timelineList");
+  if (!list) return;
+
+  const events = EVENTS.filter(event =>
+    activeTimelineFilter === "all" || event.era === activeTimelineFilter
   );
 
-  container.innerHTML = filtered.map(event => `
-    <div class="timeline-item">
-      <div class="timeline-year">
-        ${formatYear(event.year)}
-      </div>
-
-      <div class="timeline-card">
+  list.innerHTML = events.map(event => `
+    <article class="timeline-item">
+      <div class="timeline-year">${escapeHTML(event.year)}</div>
+      <span class="timeline-dot"></span>
+      <div class="timeline-content">
+        <span>${escapeHTML(PERIODS[event.era])}</span>
         <h3>${escapeHTML(event.title)}</h3>
         <p>${escapeHTML(event.description)}</p>
       </div>
-    </div>
+    </article>
   `).join("");
 }
 
-$("#timeline-filter")?.addEventListener("change", event => {
-  renderTimeline(event.target.value);
-});
-
-
-/* =========================================================
-   10. TARİH ATLASI
-   Bu ilk sürüm etkileşimli temsili harita kullanır.
-   Sınırlar ve alanlar gerçek tarihî sınırlar değildir.
-   ========================================================= */
-
-function renderAtlas(filter = "all") {
-  const map = $("#historical-map");
-
-  if (!map) return;
-
-  const filtered = STATES.filter(state =>
-    filter === "all" || state.period === filter
-  );
-
-  map.innerHTML = `
-    <div class="atlas-map-grid"></div>
-
-    <div class="atlas-map-title">
-      TARİHÎ COĞRAFYA • TEMSİLİ KONUM İŞARETLERİ
-    </div>
-
-    ${filtered.map(state => `
-      <button
-        class="map-marker"
-        data-map-state="${state.id}"
-        style="
-          left:${state.map.x}%;
-          top:${state.map.y}%;
-          --marker-color:${state.color};
-        "
-        title="${escapeHTML(state.name)}"
-      >
-        <span></span>
-      </button>
-    `).join("")}
-  `;
-
-  map.querySelectorAll("[data-map-state]").forEach(marker => {
-    marker.addEventListener("click", () => {
-      showAtlasInfo(marker.dataset.mapState);
+function setupTimeline() {
+  $$(".timeline-filter-button").forEach(button => {
+    button.addEventListener("click", () => {
+      activeTimelineFilter = button.dataset.era;
+      $$(".timeline-filter-button").forEach(item => {
+        item.classList.toggle("active", item === button);
+      });
+      renderTimeline();
     });
   });
+
+  renderTimeline();
 }
 
-function showAtlasInfo(id) {
-  const state = getState(id);
-  if (!state) return;
-
-  $("#atlas-info").innerHTML = `
-    <div class="empty-state-icon">
-      ${escapeHTML(state.symbol)}
-    </div>
-
-    <h4>${escapeHTML(state.name)}</h4>
-
-    <p>${escapeHTML(state.date)}</p>
-
-    <p>${escapeHTML(state.description)}</p>
-
-    <p><strong>Başkent:</strong> ${escapeHTML(state.capital)}</p>
-
-    <button class="primary-button" id="atlas-detail-button">
-      DEVLETİ İNCELE
-    </button>
-  `;
-
-  $("#atlas-detail-button").addEventListener("click", () => {
-    openStateDetail(id);
-  });
-}
-
-$("#atlas-period")?.addEventListener("change", event => {
-  renderAtlas(event.target.value);
-});
-
-
-/* =========================================================
-   11. STRATEJİ OYUNU
-   ========================================================= */
-
-const GAME_STORAGE_KEY = "turk-tarihi-atlasi-save-v1";
+/* ---------------------------------------------------------
+   9. OYUN DURUMU VE KAYIT SİSTEMİ
+   --------------------------------------------------------- */
 
 let game = null;
 let gameTimer = null;
 
-const GAME_TICK_MS = 15000;
+const GAME_INTERVAL = 15000;
 
-function getDefaultGameData(state) {
+function makeInitialGame(stateId) {
+  const state = getState(stateId);
+  if (!state) return null;
+
+  const initial = {
+    ancient: { treasury: 120, economy: 38, power: 45, stability: 65 },
+    islamic: { treasury: 150, economy: 48, power: 52, stability: 60 },
+    empire: { treasury: 180, economy: 58, power: 62, stability: 58 },
+    modern: { treasury: 220, economy: 65, power: 68, stability: 72 }
+  }[state.era];
+
   return {
-    stateId: state.id,
+    version: 1,
+    stateId,
     year: state.start,
-    money: state.money,
-    army: state.army,
-    stability: state.stability,
-    economy: state.economyValue,
     turn: 1,
+    treasury: initial.treasury,
+    economy: initial.economy,
+    power: initial.power,
+    stability: initial.stability,
     relations: {},
-    log: [
-      `${state.name} yönetimi başladı.`,
-      `Başkent: ${state.capital}.`,
-      `Yeni bir tarih yazmaya hazırsın.`
-    ],
-    lastSaved: Date.now()
+    log: [],
+    paused: false,
+    createdAt: Date.now()
   };
 }
 
-function saveGame() {
-  if (!game) return;
-
-  game.lastSaved = Date.now();
+function saveGame(showMessage = true) {
+  if (!game) {
+    if (showMessage) toast("Kaydedilecek bir oyun bulunmuyor.", "error");
+    return false;
+  }
 
   try {
-    localStorage.setItem(
-      GAME_STORAGE_KEY,
-      JSON.stringify(game)
-    );
+    localStorage.setItem(STORAGE.game, JSON.stringify(game));
+    $("#saveStatus").textContent = "Oyun kaydedildi";
+    if (showMessage) toast("Oyun başarıyla kaydedildi.");
+    return true;
   } catch (error) {
-    console.warn("Oyun kaydedilemedi:", error);
+    console.error("Kayıt hatası:", error);
+    if (showMessage) toast("Kayıt yapılamadı. Tarayıcı depolamasını kontrol et.", "error");
+    return false;
   }
 }
 
 function loadSavedGame() {
   try {
-    const saved = localStorage.getItem(GAME_STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE.game);
+    if (!raw) return null;
 
-    if (!saved) return null;
-
-    const data = JSON.parse(saved);
-    const state = getState(data.stateId);
-
-    if (!state || !state.playable) return null;
-
+    const parsed = JSON.parse(raw);
     if (
-      !Number.isFinite(data.year) ||
-      !Number.isFinite(data.money) ||
-      !Number.isFinite(data.army) ||
-      !Number.isFinite(data.stability) ||
-      !Number.isFinite(data.economy)
+      parsed.version !== 1 ||
+      !getState(parsed.stateId) ||
+      !Number.isFinite(parsed.year) ||
+      !Number.isFinite(parsed.turn)
     ) {
       return null;
     }
 
-    return data;
-  } catch {
+    return {
+      ...parsed,
+      relations: parsed.relations || {},
+      log: Array.isArray(parsed.log) ? parsed.log : [],
+      paused: true
+    };
+  } catch (error) {
+    console.warn("Kayıt okunamadı:", error);
     return null;
+  }
+}
+
+function deleteSavedGame() {
+  try {
+    localStorage.removeItem(STORAGE.game);
+  } catch (error) {
+    console.warn("Kayıt silinemedi:", error);
+  }
+}
+
+function addLog(message) {
+  if (!game) return;
+
+  const state = getState(game.stateId);
+  const entry = {
+    year: game.year,
+    turn: game.turn,
+    message: String(message)
+  };
+
+  game.log.unshift(entry);
+  game.log = game.log.slice(0, 60);
+  renderLog();
+
+  if (state) $("#saveStatus").textContent = "Kaydedilmemiş değişiklikler var";
+}
+
+function renderLog() {
+  const container = $("#gameLog");
+  if (!container || !game) return;
+
+  if (!game.log.length) {
+    container.innerHTML = `<div class="log-entry"><time>BAŞLANGIÇ</time><span>Henüz bir gelişme kaydedilmedi.</span></div>`;
+    return;
+  }
+
+  container.innerHTML = game.log.map(entry => `
+    <div class="log-entry">
+      <time>${escapeHTML(formatHistoricalYear(entry.year))}</time>
+      <span>${escapeHTML(entry.message)}</span>
+    </div>
+  `).join("");
+}
+
+function showGameDashboard() {
+  if (!game) return;
+
+  const state = getState(game.stateId);
+  if (!state) return;
+
+  $("#gameStart").hidden = true;
+  $("#gameDashboard").hidden = false;
+
+  $("#gameStateName").textContent = state.name;
+  $("#gameStatePeriod").textContent = `${state.date} · ${state.capital}`;
+  renderGame();
+  renderDiplomacy();
+  renderLog();
+  updateGameStatus();
+}
+
+function renderGame() {
+  if (!game) return;
+
+  $("#treasuryValue").textContent = formatNumber(game.treasury);
+  $("#economyValue").textContent = formatNumber(game.economy);
+  $("#powerValue").textContent = formatNumber(game.power);
+  $("#stabilityValue").textContent = formatNumber(game.stability);
+
+  const values = [
+    ["economy", game.economy],
+    ["power", game.power],
+    ["stability", game.stability]
+  ];
+
+  values.forEach(([key, value]) => {
+    const percent = Math.max(0, Math.min(100, value));
+    $(`#${key}Percent`).textContent = `${percent}%`;
+    $(`#${key}Bar`).style.width = `${percent}%`;
+  });
+
+  $("#gameDate").textContent = formatHistoricalYear(game.year);
+  $("#gameTurn").textContent = `${game.turn}. dönem`;
+
+  const expectedIncome = Math.round(game.economy * 0.35);
+  $("#treasuryChange").textContent = `+${expectedIncome} / dönem`;
+
+  $("#pauseGameButton").textContent = game.paused ? "Oyuna devam et" : "Oyunu duraklat";
+}
+
+function updateGameStatus() {
+  if (!game) return;
+
+  $("#gameStatus").textContent = game.paused ? "DURAKLATILDI" : "CANLI";
+  $(".status-dot").style.background = game.paused ? "var(--gold)" : "var(--green)";
+}
+
+function startGameTimer() {
+  stopGameTimer();
+  if (!game || game.paused) return;
+
+  gameTimer = window.setInterval(() => {
+    if (!game || game.paused) return;
+    advanceTurn(true);
+  }, GAME_INTERVAL);
+}
+
+function stopGameTimer() {
+  if (gameTimer !== null) {
+    window.clearInterval(gameTimer);
+    gameTimer = null;
   }
 }
 
 function startGame(stateId) {
   const state = getState(stateId);
-
-  if (!state || !state.playable) {
-    showToast("Bu devlet için oyun başlatılamıyor.");
+  if (!state) {
+    toast("Önce yönetmek istediğin devleti seç.", "error");
     return;
   }
 
   stopGameTimer();
+  game = makeInitialGame(stateId);
+  addLog(`${state.name} yönetimini devraldın.`);
+  addLog(`Yönetim merkezi: ${state.capital}.`);
+  game.paused = false;
 
-  game = getDefaultGameData(state);
-
-  const existing = loadSavedGame();
-
-  if (existing && existing.stateId === stateId) {
-    const restore = confirm(
-      "Bu devlet için kayıtlı bir oyunun var. Devam etmek ister misin?"
-    );
-
-    if (restore) {
-      game = existing;
-    }
-  }
-
-  $("#game-setup").classList.add("hidden");
-  $("#game-dashboard").classList.remove("hidden");
-
-  renderGame();
+  showGameDashboard();
   startGameTimer();
-
-  saveGame();
-
-  showToast(`${state.name} yönetimi başladı!`);
+  saveGame(false);
+  toast(`${state.name} için yeni simülasyon başladı.`);
 }
 
-function exitGame() {
-  stopGameTimer();
-
-  game = null;
-
-  $("#game-dashboard").classList.add("hidden");
-  $("#game-setup").classList.remove("hidden");
-
-  showToast("Devlet yönetiminden ayrıldın.");
-}
-
-$("#game-exit")?.addEventListener("click", () => {
-  const confirmed = confirm(
-    "Yönetim ekranından ayrılmak istiyor musun? Oyunun kaydedilecek."
-  );
-
-  if (!confirmed) return;
-
-  saveGame();
-  exitGame();
-});
-
-
-/* =========================================================
-   12. OYUN DEVLET SEÇİMİ
-   ========================================================= */
-
-function renderGameStateChoices() {
-  const container = $("#game-state-grid");
-  if (!container) return;
-
-  container.innerHTML = STATES
-    .filter(state => state.playable)
-    .map(state => `
-      <button class="game-state-option" data-play-state="${state.id}">
-        <span class="state-emblem">
-          ${escapeHTML(state.symbol)}
-        </span>
-
-        <strong>${escapeHTML(state.name)}</strong>
-
-        <small>${escapeHTML(state.date)}</small>
-      </button>
-    `).join("");
-
-  container.querySelectorAll("[data-play-state]").forEach(button => {
-    button.addEventListener("click", () => {
-      startGame(button.dataset.playState);
-    });
-  });
-}
-
-
-/* =========================================================
-   13. OYUN EKRANI
-   ========================================================= */
-
-function renderGame() {
+function advanceTurn(automatic = false) {
   if (!game) return;
 
   const state = getState(game.stateId);
-
   if (!state) return;
 
-  $("#game-state-name").textContent = state.name;
-  $("#game-state-era").textContent =
-    `${formatYear(game.year)} • ${state.capital}`;
-
-  $("#game-money").textContent = Math.round(game.money);
-  $("#game-army").textContent = Math.round(game.army);
-  $("#game-stability").textContent = Math.round(game.stability);
-  $("#game-economy").textContent = Math.round(game.economy);
-
-  renderGameMap(state);
-  renderGameLog();
-}
-
-function renderGameMap(state) {
-  const map = $("#game-map");
-
-  if (!map) return;
-
-  map.innerHTML = `
-    <div class="game-map-emblem">${escapeHTML(state.symbol)}</div>
-
-    <h3>${escapeHTML(state.name)}</h3>
-
-    <p>Yönetim merkezi: ${escapeHTML(state.capital)}</p>
-
-    <p>Bölge: ${escapeHTML(state.region)}</p>
-
-    <p class="game-map-note">
-      Bu ekran devletin tarihî merkezini temsil eder.
-      Gerçek sınır ve fetih haritası değildir.
-    </p>
-  `;
-}
-
-function renderGameLog() {
-  const container = $("#game-log");
-
-  if (!container || !game) return;
-
-  container.innerHTML = game.log
-    .slice(0, 30)
-    .map(entry => `
-      <div class="game-log-entry">
-        ${escapeHTML(entry)}
-      </div>
-    `).join("");
-}
-
-function addGameLog(message) {
-  if (!game) return;
-
-  game.log.unshift(message);
-  game.log = game.log.slice(0, 30);
-
-  renderGameLog();
-}
-
-
-/* =========================================================
-   14. OYUN KAYNAK SİSTEMİ
-   ========================================================= */
-
-function clamp(value, min = 0, max = 9999) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function performGameAction(action) {
-  if (!game) {
-    showToast("Önce bir devlet seçmelisin.");
-    return;
-  }
-
-  switch (action) {
-
-    case "economy":
-      if (game.money < 25) {
-        showToast("Hazinede yeterli kaynak yok.");
-        return;
-      }
-
-      game.money -= 25;
-      game.economy = clamp(game.economy + 8, 0, 100);
-      addGameLog("Ekonomik yatırımlar gerçekleştirildi.");
-      break;
-
-    case "stability":
-      if (game.money < 20) {
-        showToast("Hazinede yeterli kaynak yok.");
-        return;
-      }
-
-      game.money -= 20;
-      game.stability = clamp(game.stability + 10, 0, 100);
-      addGameLog("Devlet düzeni için yeni kararlar alındı.");
-      break;
-
-    case "army":
-      if (game.money < 35) {
-        showToast("Hazinede yeterli kaynak yok.");
-        return;
-      }
-
-      game.money -= 35;
-      game.army = clamp(game.army + 8, 0, 100);
-      addGameLog("Ordu kapasitesi geliştirildi.");
-      break;
-
-    case "diplomacy":
-      openDiplomacy();
-      return;
-
-    case "next-turn":
-      advanceGamePeriod();
-      return;
-
-    default:
-      return;
-  }
-
-  renderGame();
-  saveGame();
-}
-
-$$("[data-action]").forEach(button => {
-  button.addEventListener("click", () => {
-    performGameAction(button.dataset.action);
-  });
-});
-
-
-/* =========================================================
-   15. DİPLOMASİ
-   Basitleştirilmiş oyun ilişkileri sistemidir.
-   Tarihî ittifak iddiası taşımaz.
-   ========================================================= */
-
-function openDiplomacy() {
-  if (!game) return;
-
-  const others = STATES.filter(state =>
-    state.id !== game.stateId
-  );
-
-  $("#modal-content").innerHTML = `
-    <span class="section-kicker">DEVLET İLİŞKİLERİ</span>
-    <h2>Diplomasi Merkezi</h2>
-
-    <p>
-      Başka bir devlet seçerek ilişkinizi geliştirebilirsin.
-      Bu oyun içi sistem tarihî ilişkilerin birebir simülasyonu değildir.
-    </p>
-
-    <div class="diplomacy-list">
-      ${others.map(state => {
-        const relation = game.relations[state.id] ?? 0;
-
-        return `
-          <div class="diplomacy-item">
-            <div>
-              <strong>${escapeHTML(state.name)}</strong>
-              <small>İlişki puanı: ${relation}</small>
-            </div>
-
-            <button
-              class="secondary-button"
-              data-diplomacy-state="${state.id}"
-            >
-              İLİŞKİ KUR
-            </button>
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `;
-
-  $("#modal-overlay").classList.remove("hidden");
-
-  $$("#modal-content [data-diplomacy-state]").forEach(button => {
-    button.addEventListener("click", () => {
-      improveDiplomacy(button.dataset.diplomacyState);
-    });
-  });
-}
-
-function improveDiplomacy(stateId) {
-  if (!game) return;
-
-  if (game.money < 15) {
-    showToast("Diplomatik girişim için hazinede yeterli kaynak yok.");
-    return;
-  }
-
-  game.money -= 15;
-
-  const current = game.relations[stateId] ?? 0;
-
-  game.relations[stateId] = clamp(current + 10, -100, 100);
-
-  const other = getState(stateId);
-
-  addGameLog(
-    `${other.name} ile diplomatik görüşmeler gerçekleştirildi.`
-  );
-
-  saveGame();
-  renderGame();
-  openDiplomacy();
-
-  showToast("Diplomatik ilişki geliştirildi.");
-}
-
-
-/* =========================================================
-   16. OYUN DÖNEMİ İLERLETME
-   ========================================================= */
-
-function advanceGamePeriod() {
-  if (!game) return;
-
-  const state = getState(game.stateId);
-
-  game.turn++;
-
-  const yearlyIncome = Math.max(
-    1,
-    Math.round(game.economy * 0.12)
-  );
-
-  game.money += yearlyIncome;
-
-  game.stability = clamp(
-    game.stability + (Math.random() > .5 ? 1 : -1),
-    0,
-    100
-  );
-
+  game.turn += 1;
   game.year += 1;
 
-  if (game.year > state.end) {
-    addGameLog(
-      "Bu senaryo için belirlenen tarih aralığının sonuna ulaşıldı."
-    );
+  const income = Math.max(3, Math.round(game.economy * 0.35));
+  const upkeep = Math.max(2, Math.round(game.power * 0.12));
 
-    game.year = state.end;
-    stopGameTimer();
-  } else {
-    addGameLog(
-      `${formatYear(game.year)}: Yeni dönem başladı. Hazineye ${yearlyIncome} kaynak eklendi.`
-    );
+  game.treasury = Math.max(0, game.treasury + income - upkeep);
+
+  if (game.stability < 35) {
+    game.stability = Math.min(100, game.stability + 1);
   }
 
+  if (game.economy < 100 && game.turn % 4 === 0) {
+    game.economy += 1;
+  }
+
+  if (game.year > state.end && state.end !== 9999) {
+    game.stability = Math.max(0, game.stability - 1);
+    if (game.turn % 5 === 0) {
+      addLog("Seçilen tarihî dönemin sonrasına geçildi. Simülasyon alternatif tarih olarak devam ediyor.");
+    }
+  }
+
+  addLog(`${game.turn}. döneme geçildi. Gelir: +${income}, yönetim gideri: −${upkeep}.`);
   renderGame();
-  saveGame();
+  saveGame(false);
+
+  if (!automatic) toast("Yeni dönem başladı.");
 }
 
+function performDecision(action) {
+  if (!game) return;
 
-/* =========================================================
-   17. GERÇEK ZAMANLI OYUN TİCK SİSTEMİ
-   Her 15 saniyede bir ekonomik gelişme gerçekleşir.
-   ========================================================= */
+  const decisions = {
+    economy: {
+      cost: 20,
+      run: () => {
+        game.economy = Math.min(100, game.economy + 8);
+        addLog("Ekonomik üretimi destekleyen bir yatırım programı başlatıldı.");
+      }
+    },
+    stability: {
+      cost: 15,
+      run: () => {
+        game.stability = Math.min(100, game.stability + 10);
+        addLog("Toplumsal istikrarı destekleyen yönetim düzenlemeleri yapıldı.");
+      }
+    },
+    administration: {
+      cost: 25,
+      run: () => {
+        game.power = Math.min(100, game.power + 9);
+        addLog("Kamu kurumlarının ve yönetim kapasitesinin geliştirilmesi için yatırım yapıldı.");
+      }
+    },
+    research: {
+      cost: 20,
+      run: () => {
+        game.economy = Math.min(100, game.economy + 3);
+        game.stability = Math.min(100, game.stability + 4);
+        addLog("Eğitim, bilim ve kültürel çalışmalara kaynak ayrıldı.");
+      }
+    }
+  };
 
-function startGameTimer() {
-  stopGameTimer();
+  const decision = decisions[action];
+  if (!decision) return;
 
-  gameTimer = setInterval(() => {
-    if (!game) return;
+  if (game.treasury < decision.cost) {
+    toast("Bu karar için hazinede yeterli kaynak yok.", "error");
+    return;
+  }
 
-    const state = getState(game.stateId);
+  const before = { ...game };
+  game.treasury -= decision.cost;
+  decision.run();
 
-    if (game.year >= state.end) {
-      stopGameTimer();
-      return;
+  renderGame();
+  saveGame(false);
+  toast("Yönetim kararı uygulandı.");
+}
+
+/* ---------------------------------------------------------
+   10. DİPLOMASİ
+   Bu bölüm soyut oyun ilişkilerinden oluşur.
+   --------------------------------------------------------- */
+
+function getRelation(stateId) {
+  if (!game) return "Tarafsız";
+  return game.relations[stateId] || "Tarafsız";
+}
+
+function renderDiplomacy() {
+  const container = $("#diplomacyList");
+  if (!container || !game) return;
+
+  const selectedState = getState(game.stateId);
+  if (!selectedState) return;
+
+  const candidates = STATES.filter(state =>
+    state.id !== game.stateId && state.era === selectedState.era
+  ).slice(0, 5);
+
+  if (!candidates.length) {
+    container.innerHTML = `<p class="game-note">Bu dönem için listelenecek başka devlet bulunmuyor.</p>`;
+    return;
+  }
+
+  container.innerHTML = candidates.map(state => {
+    const relation = getRelation(state.id);
+    const isAlly = relation === "Dostluk";
+    const actionLabel = isAlly ? "İlişkiyi yenile" : "Dostluk öner";
+
+    return `
+      <div class="diplomacy-item">
+        <div>
+          <strong>${escapeHTML(state.name)}</strong>
+          <small>${escapeHTML(relation)}</small>
+        </div>
+        <button class="diplomacy-action" data-diplomacy="${escapeHTML(state.id)}">
+          ${actionLabel}
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+function makeDiplomaticProposal(stateId) {
+  if (!game) return;
+
+  const target = getState(stateId);
+  if (!target) return;
+
+  const cost = 12;
+  if (game.treasury < cost) {
+    toast("Diplomatik girişim için yeterli hazine yok.", "error");
+    return;
+  }
+
+  game.treasury -= cost;
+  game.relations[stateId] = "Dostluk";
+  game.stability = Math.min(100, game.stability + 2);
+
+  addLog(`${target.name} ile dostane ilişkiler geliştirmek için diplomatik girişimde bulunuldu.`);
+  renderGame();
+  renderDiplomacy();
+  saveGame(false);
+  toast(`${target.name} ile dostluk ilişkisi kuruldu.`);
+}
+
+/* ---------------------------------------------------------
+   11. OYUN ARAYÜZÜ ETKİLEŞİMLERİ
+   --------------------------------------------------------- */
+
+function setupGame() {
+  const select = $("#gameStateSelect");
+  if (!select) return;
+
+  const playableStates = [...STATES].sort((a, b) => a.start - b.start);
+
+  select.innerHTML = `
+    <option value="">Bir devlet seç...</option>
+    ${playableStates.map(state => `
+      <option value="${escapeHTML(state.id)}">
+        ${escapeHTML(state.name)} — ${escapeHTML(state.date)}
+      </option>
+    `).join("")}
+  `;
+
+  $("#startGameButton")?.addEventListener("click", () => {
+    startGame(select.value);
+  });
+
+  $("#gameDashboard")?.addEventListener("click", event => {
+    const decisionButton = event.target.closest("[data-action]");
+    if (decisionButton) {
+      performDecision(decisionButton.dataset.action);
     }
 
-    const income = Math.max(
-      1,
-      Math.round(game.economy * 0.025)
-    );
+    const diplomacyButton = event.target.closest("[data-diplomacy]");
+    if (diplomacyButton) {
+      makeDiplomaticProposal(diplomacyButton.dataset.diplomacy);
+    }
+  });
 
-    game.money += income;
+  $("#nextTurnButton")?.addEventListener("click", () => {
+    if (!game) return;
+    advanceTurn(false);
+  });
 
-    addGameLog(
-      `Zaman ilerledi. Ekonomik faaliyetlerden ${income} kaynak kazanıldı.`
-    );
+  $("#pauseGameButton")?.addEventListener("click", () => {
+    if (!game) return;
+
+    game.paused = !game.paused;
+
+    if (game.paused) {
+      stopGameTimer();
+      addLog("Simülasyon duraklatıldı.");
+    } else {
+      addLog("Simülasyon yeniden başlatıldı.");
+      startGameTimer();
+    }
 
     renderGame();
-    saveGame();
+    updateGameStatus();
+    saveGame(false);
+  });
 
-  }, GAME_TICK_MS);
-}
+  $("#saveGameButton")?.addEventListener("click", () => saveGame(true));
 
-function stopGameTimer() {
-  if (gameTimer) {
-    clearInterval(gameTimer);
-    gameTimer = null;
-  }
-}
+  $("#leaveGameButton")?.addEventListener("click", () => {
+    if (!game) return;
 
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    saveGame();
-  }
-});
+    const confirmed = window.confirm("Yönetim ekranından ayrılmak istiyor musun? Kaydın korunacak.");
+    if (!confirmed) return;
 
-window.addEventListener("beforeunload", () => {
-  saveGame();
-});
+    stopGameTimer();
+    game.paused = true;
+    saveGame(false);
+    game = null;
 
+    $("#gameDashboard").hidden = true;
+    $("#gameStart").hidden = false;
+    $("#gameStatus").textContent = "HAZIR";
+    $("#saveStatus").textContent = "Kayıt korunuyor";
+    toast("Yönetim ekranından ayrıldın. Kaydın saklandı.");
+  });
 
-/* =========================================================
-   18. MODAL PENCERESİ
-   ========================================================= */
+  $("#clearLogButton")?.addEventListener("click", () => {
+    if (!game) return;
+    game.log = [];
+    renderLog();
+    saveGame(false);
+    toast("Günlük temizlendi.");
+  });
 
-function closeModal() {
-  $("#modal-overlay")?.classList.add("hidden");
-}
-
-$("#modal-close")?.addEventListener("click", closeModal);
-
-$("#modal-overlay")?.addEventListener("click", event => {
-  if (event.target.id === "modal-overlay") {
-    closeModal();
-  }
-});
-
-document.addEventListener("keydown", event => {
-  if (event.key === "Escape") {
-    closeModal();
-  }
-});
-
-
-/* =========================================================
-   19. SES AYARI
-   Bu sürümde ses düğmesi yalnızca durum göstergesidir.
-   ========================================================= */
-
-let soundEnabled = false;
-
-$("#sound-toggle")?.addEventListener("click", () => {
-  soundEnabled = !soundEnabled;
-
-  $("#sound-toggle").textContent =
-    soundEnabled ? "♫" : "♪";
-
-  showToast(
-    soundEnabled
-      ? "Ses seçeneği açıldı."
-      : "Ses seçeneği kapatıldı."
-  );
-});
-
-
-/* =========================================================
-   20. KAYITLI OYUNU GERİ YÜKLEME
-   ========================================================= */
-
-function restoreGameIfAvailable() {
   const saved = loadSavedGame();
 
-  if (!saved) return;
+  if (saved) {
+    game = saved;
+    const savedState = getState(saved.stateId);
+    $("#gameStart").hidden = false;
+    $("#gameDashboard").hidden = true;
 
-  const state = getState(saved.stateId);
+    const option = [...select.options].find(item => item.value === saved.stateId);
+    if (option) {
+      option.textContent = `${savedState.name} — kayıt bulundu`;
+    }
 
-  if (!state) return;
+    const resumeButton = document.createElement("button");
+    resumeButton.className = "button button-muted";
+    resumeButton.type = "button";
+    resumeButton.textContent = "Kayıtlı oyuna devam et";
+    resumeButton.style.marginTop = "8px";
+    $("#gameStart .game-start-controls").appendChild(resumeButton);
 
-  const continueGame = confirm(
-    `${state.name} için kayıtlı oyunun var. Devam etmek ister misin?`
-  );
-
-  if (!continueGame) return;
-
-  game = saved;
-
-  $("#game-setup").classList.add("hidden");
-  $("#game-dashboard").classList.remove("hidden");
-
-  renderGame();
-  startGameTimer();
-
-  showToast("Kayıtlı oyun yüklendi.");
+    resumeButton.addEventListener("click", () => {
+      game.paused = false;
+      showGameDashboard();
+      addLog("Kayıtlı simülasyona devam edildi.");
+      startGameTimer();
+      saveGame(false);
+      toast("Kayıtlı oyun açıldı.");
+    });
+  }
 }
 
+/* ---------------------------------------------------------
+   12. TEMA, MENÜ VE SAYFA KONTROLLERİ
+   --------------------------------------------------------- */
 
-/* =========================================================
-   21. UYGULAMA BAŞLATMA
-   ========================================================= */
+function setupTheme() {
+  const savedTheme = localStorage.getItem(STORAGE.theme);
+  if (savedTheme === "light") document.body.classList.add("light-theme");
 
-function initializeApplication() {
-  initializeHome();
+  $("#themeButton")?.addEventListener("click", () => {
+    document.body.classList.toggle("light-theme");
 
-  renderStates("all");
-  renderTimeline("all");
-  renderAtlas("all");
-  renderGameStateChoices();
+    const theme = document.body.classList.contains("light-theme") ? "light" : "dark";
 
-  const loadingScreen = $("#loading-screen");
-  const app = $("#app");
-
-  setTimeout(() => {
-    loadingScreen?.classList.add("hidden");
-    app?.classList.remove("hidden");
-  }, 900);
-
-  setTimeout(() => {
-    restoreGameIfAvailable();
-  }, 1100);
-
-  console.log(
-    "Türk Tarihi Atlası hazır.",
-    `${STATES.length} devlet kayıtlı.`
-  );
+    try {
+      localStorage.setItem(STORAGE.theme, theme);
+    } catch (error) {
+      console.warn("Tema tercihi saklanamadı:", error);
+    }
+  });
 }
 
-initializeApplication();
+function setupMobileMenu() {
+  const button = $("#mobileMenuButton");
+  const nav = $("#mainNav");
+  if (!button || !nav) return;
 
-/* ATLAS HARİTA İŞARETLERİ */
+  button.addEventListener("click", () => {
+    const open = nav.classList.toggle("open");
+    button.setAttribute("aria-expanded", String(open));
+  });
 
-.atlas-map-grid {
-  position: absolute;
-  inset: 0;
-  opacity: .2;
-  background-image:
-    linear-gradient(rgba(201,164,92,.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,164,92,.12) 1px, transparent 1px);
-  background-size: 35px 35px;
+  $$(".nav-link", nav).forEach(link => {
+    link.addEventListener("click", () => {
+      nav.classList.remove("open");
+      button.setAttribute("aria-expanded", "false");
+    });
+  });
 }
 
-.atlas-map-title {
-  position: absolute;
-  bottom: 15px;
-  left: 15px;
-  font-size: 8px;
-  letter-spacing: 2px;
-  color: var(--gold);
+function setupNavigation() {
+  const links = $$(".nav-link");
+  const sections = links
+    .map(link => document.querySelector(link.getAttribute("href")))
+    .filter(Boolean);
+
+  if (!("IntersectionObserver" in window)) return;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+
+      links.forEach(link => {
+        link.classList.toggle(
+          "active",
+          link.getAttribute("href") === `#${entry.target.id}`
+        );
+      });
+    });
+  }, {
+    rootMargin: "-25% 0px -65% 0px"
+  });
+
+  sections.forEach(section => observer.observe(section));
 }
 
-.map-marker {
-  position: absolute;
-  z-index: 2;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px solid var(--marker-color);
-  background: color-mix(in srgb, var(--marker-color) 25%, transparent);
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  transition: .2s ease;
+function setupKeyboardShortcuts() {
+  document.addEventListener("keydown", event => {
+    const tag = document.activeElement?.tagName;
+    const typing = tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+
+    if (event.key === "/" && !typing) {
+      event.preventDefault();
+      $("#stateSearch")?.focus();
+    }
+
+    if (event.key === "Escape") {
+      $("#mainNav")?.classList.remove("open");
+      $("#mobileMenuButton")?.setAttribute("aria-expanded", "false");
+    }
+  });
 }
 
-.map-marker span {
-  width: 7px;
-  height: 7px;
-  background: var(--marker-color);
-  border-radius: 50%;
+function setupFooter() {
+  $("#currentYear").textContent = new Date().getFullYear();
 }
 
-.map-marker:hover {
-  transform: translate(-50%, -50%) scale(1.5);
-  box-shadow: 0 0 18px var(--marker-color);
+/* ---------------------------------------------------------
+   13. UYGULAMA BAŞLATMA
+   --------------------------------------------------------- */
+
+function initializeApp() {
+  try {
+    setupTheme();
+    setupMobileMenu();
+    setupNavigation();
+    setupKeyboardShortcuts();
+    setupFooter();
+
+    renderFeatured();
+    setupStateFilters();
+    renderStates();
+    setupStateDetails();
+    setupMap();
+    setupTimeline();
+    setupGame();
+
+    document.body.classList.add("app-ready");
+
+    window.setTimeout(() => {
+      $("#pageLoader")?.classList.add("loaded");
+    }, 350);
+
+    console.info("Türk Tarihi Atlası başarıyla başlatıldı.");
+    console.info(`${STATES.length} devlet kaydı ve ${EVENTS.length} tarihî olay yüklendi.`);
+  } catch (error) {
+    console.error("Uygulama başlatılırken hata oluştu:", error);
+    $("#pageLoader")?.classList.add("loaded");
+    toast("Uygulama başlatılırken bir hata oluştu. Konsolu kontrol et.", "error");
+  }
 }
 
-.game-map-emblem {
-  font-size: 65px;
-  color: var(--gold);
-}
-
-.game-map h3 {
-  font-family: 'Cinzel', serif;
-  color: var(--gold-light);
-  margin: 12px 0;
-}
-
-.game-map p {
-  font-size: 11px;
-  line-height: 1.8;
-}
-
-.game-map-note {
-  max-width: 300px;
-  margin-top: 20px;
-  color: var(--gold);
-}
-
-.diplomacy-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.diplomacy-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: #101923;
-  border: 1px solid var(--border);
-  padding: 13px;
-  border-radius: 6px;
-}
-
-.diplomacy-item strong,
-.diplomacy-item small {
-  display: block;
-}
-
-.diplomacy-item strong {
-  font-size: 11px;
-}
-
-.diplomacy-item small {
-  font-size: 9px;
-  color: var(--muted);
-  margin-top: 5px;
-}
-
-.diplomacy-item button {
-  padding: 10px;
-  font-size: 8px;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApp, { once: true });
+} else {
+  initializeApp();
 }
